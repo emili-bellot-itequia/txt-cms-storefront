@@ -1,0 +1,230 @@
+.storefront-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+.header-topbar {
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 6px 0;
+  font-size: 13px;
+}
+
+.topbar-link {
+  color: #495057;
+  text-decoration: none;
+  font-size: 13px;
+}
+.topbar-link:hover { color: var(--bs-primary); }
+
+.topbar-dropdown .dropdown-toggle {
+  color: #495057;
+  font-size: 13px;
+  background: none;
+  border: none;
+  padding: 0;
+}
+.topbar-dropdown .dropdown-toggle::after { display: none !important; }
+
+.header-main {
+  background: #fff;
+  padding: 12px 0;
+}
+
+.brand { font-size: 1.4rem; font-weight: 800; text-decoration: none; }
+.brand-txt { color: #212529; }
+.brand-cms { color: var(--bs-primary); }
+
+.header-search { max-width: 460px; width: 100%; }
+
+.cart-btn {
+  position: relative;
+  background: none;
+  border: none;
+  padding: 6px 10px;
+  color: #212529;
+  cursor: pointer;
+  transition: color .2s;
+}
+.cart-btn:hover { color: var(--bs-primary); }
+
+.cart-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 10px;
+  min-width: 17px;
+  height: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+/* ── Mega Menu ─────────────────────────────────────────── */
+.nav-menu-bar {
+  position: relative;
+  background: #fff;
+  border-top: 1px solid #e9ecef;
+  border-bottom: 1px solid #e9ecef;
+  z-index: 999;
+}
+
+.nav-menu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+}
+
+.nav-menu-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.nav-menu-link {
+  display: block;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #212529;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color .15s;
+  line-height: 1;
+}
+.nav-menu-link:hover,
+.nav-menu-item.is-active .nav-menu-link {
+  color: var(--bs-primary);
+  text-decoration: none;
+}
+
+.nav-menu-indicator {
+  display: block;
+  position: absolute;
+  bottom: 0;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  background: var(--bs-primary);
+  opacity: 0;
+  transition: opacity .15s;
+}
+.nav-menu-item.is-active .nav-menu-indicator {
+  opacity: 1;
+}
+
+/* Mega panel */
+.mega-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-top: 2px solid var(--bs-primary);
+  border-bottom: 1px solid #e9ecef;
+  box-shadow: 0 8px 24px rgba(0,0,0,.10);
+  animation: megaFadeIn .15s ease;
+  z-index: 998;
+}
+
+@keyframes megaFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.mega-panel-inner {
+  padding: 28px 0 32px;
+}
+
+.mega-section-header {
+  margin-bottom: 20px;
+}
+
+.mega-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6c757d;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  transition: color .15s;
+}
+.mega-section-title:hover { color: var(--bs-primary); }
+
+.mega-columns {
+  display: flex;
+  gap: 40px;
+}
+
+.mega-col {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: 140px;
+}
+
+.mega-col li {
+  margin-bottom: 2px;
+}
+
+.mega-link {
+  display: block;
+  padding: 7px 0;
+  font-size: 14px;
+  color: #212529;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color .15s, border-color .15s;
+}
+.mega-link:hover {
+  color: var(--bs-primary);
+  text-decoration: none;
+  border-bottom-color: var(--bs-primary);
+}
+
+/* Mega panel body layout */
+.mega-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
+}
+
+.mega-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Right image */
+.mega-image-wrap {
+  flex-shrink: 0;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.mega-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+  transition: opacity .2s;
+}
+.mega-image-wrap:hover .mega-image { opacity: .88; }
+
+.mega-image-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #212529;
+  transition: color .15s;
+}
+.mega-image-wrap:hover .mega-image-label { color: var(--bs-primary); }

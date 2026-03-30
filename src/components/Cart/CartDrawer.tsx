@@ -1,0 +1,109 @@
+import React, { useEffect, useState } from 'react';
+import { Offcanvas, Button } from 'react-bootstrap';
+import { FaTrash, FaMinus, FaPlus, FaShoppingBag } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
+import { useCart } from '../../contexts/CartContext';
+import './CartDrawer.css';
+
+const CartDrawer: React.FC = () => {
+  const { cart, drawerOpen, closeDrawer, updateItem, removeItem, loading } = useCart();
+  const navigate = useNavigate();
+  const [timeLeft, setTimeLeft] = useState('');
+
+  // Countdown timer
+  useEffect(() => {
+    if (!cart?.expiresAt) { setTimeLeft(''); return; }
+    const tick = () => {
+      const diff = new Date(cart.expiresAt).getTime() - Date.now();
+      if (diff <= 0) { setTimeLeft('Expirado'); return; }
+      const m = Math.floor(diff / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setTimeLeft(`${m}:${s.toString().padStart(2, '0')}`);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [cart?.expiresAt]);
+
+  const isEmpty = !cart?.items?.length;
+
+  return (
+    <Offcanvas show={drawerOpen} onHide={closeDrawer} placement="end" className="cart-offcanvas">
+      <Offcanvas.Header closeButton>
+        <Offcanvas.Title className="fw-bold">
+          <FaShoppingBag className="me-2" />
+          Mi carrito
+        </Offcanvas.Title>
+      </Offcanvas.Header>
+
+      <Offcanvas.Body className="d-flex flex-column">
+        {/* Countdown */}
+        {!isEmpty && timeLeft && (
+          <div className={`cart-countdown mb-3 ${timeLeft === 'Expirado' ? 'expired' : ''}`}>
+            🕐 Reserva expira en: <strong>{timeLeft}</strong>
+          </div>
+        )}
+
+        {isEmpty ? (
+          <div className="text-center text-muted my-auto">
+            <FaShoppingBag size={48} className="mb-3 opacity-25" />
+            <p>Tu carrito está vacío</p>
+            <Button variant="primary" onClick={() => { closeDrawer(); navigate('/catalog'); }}>
+              Ver catálogo
+            </Button>
+          </div>
+        ) : (
+          <>
+            {/* Items */}
+            <div className="cart-items flex-grow-1">
+              {cart!.items.map(item => (
+                <div key={item.id} className="cart-item">
+                  <div className="cart-item-img">
+                    {item.thumbnailUrl
+                      ? <img src={item.thumbnailUrl} alt={item.productName} />
+                      : <div className="cart-item-placeholder">📦</div>}
+                  </div>
+                  <div className="cart-item-info flex-grow-1">
+                    <div className="cart-item-name">{item.productName}</div>
+                    <div className="cart-item-price">€{item.unitPrice.toFixed(2)}</div>
+                    <div className="cart-item-qty">
+                      <button className="qty-btn" disabled={loading || item.quantity <= 1} onClick={() => updateItem(item.id, item.quantity - 1)}>
+                        <FaMinus size={10} />
+                      </button>
+                      <span className="qty-value">{item.quantity}</span>
+                      <button className="qty-btn" disabled={loading || item.quantity >= item.availableStock} onClick={() => updateItem(item.id, item.quantity + 1)}>
+                        <FaPlus size={10} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="cart-item-subtotal">
+                    <div className="fw-semibold">€{item.subtotal.toFixed(2)}</div>
+                    <button className="remove-btn" onClick={() => removeItem(item.id)} disabled={loading}>
+                      <FaTrash size={12} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div className="cart-footer">
+              <div className="d-flex justify-content-between fw-bold fs-5 mb-3">
+                <span>Total</span>
+                <span>€{(cart!.total ?? 0).toFixed(2)}</span>
+              </div>
+              <Button variant="primary" size="lg" className="w-100 mb-2" onClick={() => { closeDrawer(); navigate('/checkout'); }}>
+                Finalizar compra
+              </Button>
+              <Button variant="outline-secondary" className="w-100" as={Link as any} to="/cart" onClick={closeDrawer}>
+                Ver carrito completo
+              </Button>
+            </div>
+          </>
+        )}
+      </Offcanvas.Body>
+    </Offcanvas>
+  );
+};
+
+export default CartDrawer;

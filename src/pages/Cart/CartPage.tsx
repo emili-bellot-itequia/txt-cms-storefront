@@ -1,0 +1,130 @@
+import React, { useEffect, useState } from 'react';
+import { Container, Row, Col, Button, Card, Alert, Form } from 'react-bootstrap';
+import { FaTrash, FaArrowRight } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import MainLayout from '../../components/Layout/MainLayout';
+import { useCart } from '../../contexts/CartContext';
+import { useAuth } from '../../contexts/AuthContext';
+
+const CartPage: React.FC = () => {
+  const { cart, loading, fetchCart, updateItem, removeItem } = useCart();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => { if (isAuthenticated) fetchCart(); }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!cart?.expiresAt) { setTimeLeft(''); return; }
+    const tick = () => {
+      const diff = new Date(cart.expiresAt).getTime() - Date.now();
+      if (diff <= 0) { setTimeLeft('Expirado'); return; }
+      const m = Math.floor(diff / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setTimeLeft(`${m}:${s.toString().padStart(2, '0')}`);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [cart?.expiresAt]);
+
+  if (!isAuthenticated) return (
+    <MainLayout>
+      <Container className="py-5 text-center">
+        <h4>Inicia sesión para ver tu carrito</h4>
+        <Button variant="primary" onClick={() => navigate('/login')}>Iniciar sesión</Button>
+      </Container>
+    </MainLayout>
+  );
+
+  const isEmpty = !cart?.items?.length;
+
+  return (
+    <MainLayout>
+      <Container className="py-4">
+        <h2 className="fw-bold mb-4">Mi carrito</h2>
+
+        {isEmpty ? (
+          <div className="text-center py-5">
+            <p className="text-muted mb-3">Tu carrito está vacío</p>
+            <Button variant="primary" onClick={() => navigate('/catalog')}>Ver catálogo</Button>
+          </div>
+        ) : (
+          <Row>
+            <Col lg={8}>
+              {timeLeft && (
+                <Alert variant={timeLeft === 'Expirado' ? 'danger' : 'warning'} className="d-flex align-items-center gap-2">
+                  🕐 Reserva expira en: <strong>{timeLeft}</strong>
+                  {timeLeft === 'Expirado' && <Button size="sm" variant="outline-danger" onClick={fetchCart} className="ms-auto">Actualizar</Button>}
+                </Alert>
+              )}
+
+              {cart!.items.map(item => (
+                <Card key={item.id} className="mb-3">
+                  <Card.Body>
+                    <Row className="align-items-center">
+                      <Col xs={3} sm={2}>
+                        {item.thumbnailUrl
+                          ? <img src={item.thumbnailUrl} alt={item.productName} className="w-100 rounded" style={{ aspectRatio: '1', objectFit: 'cover' }} />
+                          : <div className="bg-light rounded d-flex align-items-center justify-content-center" style={{ aspectRatio: '1', fontSize: 24 }}>📦</div>}
+                      </Col>
+                      <Col xs={9} sm={5}>
+                        <div className="fw-semibold">{item.productName}</div>
+                        <div className="text-muted small">{item.productCode}</div>
+                        <div className="text-muted small">€{item.unitPrice.toFixed(2)} / m</div>
+                      </Col>
+                      <Col sm={3} className="d-flex align-items-center mt-2 mt-sm-0">
+                        <Form.Control
+                          type="number"
+                          min={0.3}
+                          step={0.05}
+                          value={item.quantity}
+                          onChange={(e) => {
+                            const v = parseFloat(e.target.value);
+                            if (!isNaN(v) && v >= 0.3) updateItem(item.id, v);
+                          }}
+                          style={{ width: 90 }}
+                          disabled={loading}
+                        />
+                      </Col>
+                      <Col sm={2} className="text-end mt-2 mt-sm-0">
+                        <div className="fw-bold">€{item.subtotal.toFixed(2)}</div>
+                        <Button size="sm" variant="link" className="text-danger p-0" onClick={() => removeItem(item.id)} disabled={loading}>
+                          <FaTrash size={12} />
+                        </Button>
+                      </Col>
+                    </Row>
+                  </Card.Body>
+                </Card>
+              ))}
+            </Col>
+
+            <Col lg={4}>
+              <Card className="sticky-top" style={{ top: 90 }}>
+                <Card.Body>
+                  <h5 className="fw-bold mb-3">Resumen</h5>
+                  {cart!.items.map(item => (
+                    <div key={item.id} className="d-flex justify-content-between small mb-1">
+                      <span className="text-muted">{item.productName} x{item.quantity}m</span>
+                      <span>€{item.subtotal.toFixed(2)}</span>
+                    </div>
+                  ))}
+                  <hr />
+                  <div className="d-flex justify-content-between fw-bold fs-5 mb-3">
+                    <span>Total</span>
+                    <span>€{(cart!.total ?? 0).toFixed(2)}</span>
+                  </div>
+                  <Button variant="primary" size="lg" className="w-100" onClick={() => navigate('/checkout')}>
+                    Finalizar compra <FaArrowRight className="ms-1" />
+                  </Button>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        )}
+      </Container>
+    </MainLayout>
+  );
+};
+
+export default CartPage;
