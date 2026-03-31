@@ -1,6 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
+import { FavoritesProvider } from './contexts/FavoritesContext';
+import { SiteSettingsProvider } from './contexts/SiteSettingsContext';
+import { PaymentMethodsProvider } from './contexts/PaymentMethodsContext';
+import { PartnersProvider } from './contexts/PartnersContext';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 
 import LandingPage from './pages/Home/LandingPage';
@@ -16,37 +20,47 @@ import RegisterPage from './pages/Auth/RegisterPage';
 import AccountPage from './pages/Account/AccountPage';
 import OrdersPage from './pages/Account/OrdersPage';
 import OrderDetailPage from './pages/Account/OrderDetailPage';
+import FavoritesPage from './pages/Favorites/FavoritesPage';
 
 function App() {
   return (
     <BrowserRouter>
+      <SiteSettingsProvider>
+      <PaymentMethodsProvider>
+      <PartnersProvider>
       <AuthProvider>
         <CartProvider>
-          <Routes>
-            {/* Public */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/catalog" element={<HomePage />} />
-            <Route path="/product/:slug" element={<ProductDetailPage />} />
-            <Route path="/variant/:id" element={<VariantDetailPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/pages/:slug" element={<PageCatalogPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+          <FavoritesProvider>
+            <Routes>
+              {/* Public */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/catalog" element={<HomePage />} />
+              <Route path="/product/:slug" element={<ProductDetailPage />} />
+              <Route path="/variant/:id" element={<VariantDetailPage />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/pages/:slug" element={<PageCatalogPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
 
-            {/* Protected (Customer) */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
-              <Route path="/account" element={<AccountPage />} />
-              <Route path="/account/orders" element={<OrdersPage />} />
-              <Route path="/account/orders/:id" element={<OrderDetailPage />} />
-            </Route>
+              {/* Protected (Customer) */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/checkout" element={<CheckoutPage />} />
+                <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
+                <Route path="/account" element={<AccountPage />} />
+                <Route path="/account/orders" element={<OrdersPage />} />
+                <Route path="/account/orders/:id" element={<OrderDetailPage />} />
+                <Route path="/favorites" element={<FavoritesPage />} />
+              </Route>
 
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+              {/* Fallback */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </FavoritesProvider>
         </CartProvider>
       </AuthProvider>
+      </PartnersProvider>
+      </PaymentMethodsProvider>
+      </SiteSettingsProvider>
     </BrowserRouter>
   );
 }

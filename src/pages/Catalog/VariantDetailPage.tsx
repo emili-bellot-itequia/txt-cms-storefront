@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Button, Badge, Spinner, Alert, Form } from 'react-bootstrap';
 import { FaShoppingCart, FaArrowLeft } from 'react-icons/fa';
+import FavoriteButton from '../../components/common/FavoriteButton';
 import MainLayout from '../../components/Layout/MainLayout';
 import { getVariantById } from '../../services/productService';
 import type { StorefrontVariantDetail } from '../../types';
@@ -132,10 +133,13 @@ const VariantDetailPage: React.FC = () => {
 
             {error && <Alert variant="danger" className="py-2">{error}</Alert>}
 
-            <Button variant="primary" size="lg" className="w-100 mb-3" disabled={outOfStock || cartLoading} onClick={handleAddToCart}>
-              <FaShoppingCart className="me-2" />
-              {outOfStock ? 'Sin stock' : 'Añadir al carrito'}
-            </Button>
+            <div className="d-flex gap-2 mb-3">
+              <Button variant="primary" size="lg" className="flex-grow-1" disabled={outOfStock || cartLoading} onClick={handleAddToCart}>
+                <FaShoppingCart className="me-2" />
+                {outOfStock ? 'Sin stock' : 'Añadir al carrito'}
+              </Button>
+              <FavoriteButton variantId={variant.id} size="lg" />
+            </div>
 
             <hr />
             <div className="text-muted" style={{ whiteSpace: 'pre-line' }}>{variant.description}</div>

@@ -1,0 +1,59 @@
+.fav-card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+  overflow: hidden;
+  transition: box-shadow .2s, transform .2s;
+}
+
+.fav-card:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,.1);
+  transform: translateY(-2px);
+}
+
+.fav-card-img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+}
+
+.fav-card-placeholder {
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  font-size: 40px;
+}
+
+.fav-card-outofstock {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.fav-card-name {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.fav-card-name a {
+  color: #212529;
+  text-decoration: none;
+}
+
+.fav-card-name a:hover {
+  color: var(--bs-primary);
+}

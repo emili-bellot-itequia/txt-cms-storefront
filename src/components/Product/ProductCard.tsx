@@ -6,6 +6,7 @@ import type { StorefrontProduct } from '../../types';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import FavoriteButton from '../common/FavoriteButton';
 import './ProductCard.css';
 
 interface Props { product: StorefrontProduct; }
@@ -28,13 +29,16 @@ const ProductCard: React.FC<Props> = ({ product }) => {
 
   return (
     <Card className="product-card h-100">
-      <Link to={`/product/${product.slug}`} className="product-card-img-link">
-        {product.thumbnailUrl
-          ? <Card.Img variant="top" src={product.thumbnailUrl} className="product-card-img" />
-          : <div className="product-card-placeholder">📦</div>}
-        {hasDiscount && <Badge bg="danger" className="discount-badge">{hasGroupDiscount ? `−${product.discountPercent}%` : 'OFERTA'}</Badge>}
-        {outOfStock && <div className="out-of-stock-overlay">Sin stock</div>}
-      </Link>
+      <div className="product-card-img-wrapper">
+        <Link to={`/product/${product.slug}`} className="product-card-img-link">
+          {product.thumbnailUrl
+            ? <Card.Img variant="top" src={product.thumbnailUrl} className="product-card-img" />
+            : <div className="product-card-placeholder">📦</div>}
+          {hasDiscount && <Badge bg="danger" className="discount-badge">{hasGroupDiscount ? `−${product.discountPercent}%` : 'OFERTA'}</Badge>}
+          {outOfStock && <div className="out-of-stock-overlay">Sin stock</div>}
+        </Link>
+        <FavoriteButton productId={product.id} size="sm" className="product-card-fav" />
+      </div>
       <Card.Body className="d-flex flex-column">
         <div className="product-card-type">{product.productTypeName}</div>
         <Card.Title as="h6" className="product-card-name">

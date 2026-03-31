@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import { Navbar, Nav, Container, Badge, Form, InputGroup, Button, NavDropdown } from 'react-bootstrap';
-import { FaShoppingCart, FaUser, FaSearch, FaBars } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaSearch, FaBars, FaHeart } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
+import { useFavorites } from '../../contexts/FavoritesContext';
+import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import NavMenu from './NavMenu';
 import './Header.css';
 
 const Header: React.FC = () => {
   const { isAuthenticated, name, logout } = useAuth();
   const { itemCount, openDrawer } = useCart();
+  const { count: favCount } = useFavorites();
+  const { logoUrl, siteName } = useSiteSettings();
   const [search, setSearch] = useState('');
   const navigate = useNavigate();
 
@@ -48,8 +52,10 @@ const Header: React.FC = () => {
       <Navbar expand="lg" className="header-main">
         <Container>
           <Navbar.Brand as={Link} to="/" className="brand">
-            <span className="brand-txt">TXT</span>
-            <span className="brand-cms"> Shop</span>
+            {logoUrl
+              ? <img src={logoUrl} alt={siteName} className="brand-logo" />
+              : <><span className="brand-txt">TXT</span><span className="brand-cms"> Shop</span></>
+            }
           </Navbar.Brand>
 
           <Navbar.Toggle aria-controls="main-nav"><FaBars /></Navbar.Toggle>
@@ -66,7 +72,13 @@ const Header: React.FC = () => {
               </InputGroup>
             </Form>
 
-            <Nav className="ms-auto align-items-center">
+            <Nav className="ms-auto align-items-center gap-2">
+              {isAuthenticated && (
+                <Link to="/favorites" className="cart-btn text-decoration-none">
+                  <FaHeart size={20} />
+                  {favCount > 0 && <Badge bg="danger" className="cart-badge">{favCount}</Badge>}
+                </Link>
+              )}
               <button className="cart-btn" onClick={openDrawer}>
                 <FaShoppingCart size={20} />
                 {itemCount > 0 && <Badge bg="danger" className="cart-badge">{itemCount}</Badge>}

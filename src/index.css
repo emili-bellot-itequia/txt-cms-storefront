@@ -57,3 +57,89 @@ body {
 
 /* Utility */
 .fs-xs { font-size: 0.7rem !important; }
+
+/* Footer */
+.storefront-footer { border-top: 1px solid #e9ecef; }
+
+/* Top columns section */
+.footer-top { background: #f5f5f5; }
+.footer-col-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: #212529;
+  margin-bottom: 10px;
+}
+.footer-col-links { display: flex; flex-direction: column; gap: 6px; }
+.footer-link { font-size: 13px; color: #495057; text-decoration: none; }
+.footer-link:hover { color: #000; text-decoration: underline; }
+.footer-link-plain { font-size: 13px; color: #6c757d; }
+
+/* Bottom bar */
+.footer-bottom { background: #fff; border-top: 1px solid #e9ecef; }
+.footer-bottom-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 0 6px;
+}
+.footer-legal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.footer-legal-link { font-size: 12px; color: #495057; text-decoration: none; }
+.footer-legal-link:hover { color: #000; text-decoration: underline; }
+.footer-legal-sep { color: #adb5bd; font-size: 12px; }
+
+/* Social icon buttons */
+.footer-social { display: flex; gap: 8px; }
+.footer-social-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #212529;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, transform .15s;
+  text-decoration: none;
+}
+.footer-social-btn:hover { background: #000; transform: scale(1.1); color: #fff; }
+
+.footer-copyright { font-size: 11px; color: #adb5bd; text-align: center; padding: 8px 0 10px; margin: 0; }
+
+/* Logos column */
+.footer-logos-grid { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.footer-logo-item { display: inline-flex; align-items: center; }
+.footer-logo-img {
+  height: 32px;
+  max-width: 80px;
+  object-fit: contain;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 3px 6px;
+  background: #fff;
+}
+
+/* Features column */
+.footer-features-list { display: flex; flex-direction: column; gap: 8px; }
+.footer-feature-item { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #495057; }
+.footer-feature-icon { font-size: 16px; flex-shrink: 0; line-height: 1.3; }
+
+/* Payment method logo without image */
+.footer-logo-placeholder {
+  font-size: 11px;
+  font-weight: 600;
+  color: #495057;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 4px 8px;
+  background: #fff;
+  white-space: nowrap;
+}

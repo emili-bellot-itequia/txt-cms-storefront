@@ -26,6 +26,10 @@ export interface StorefrontVariant {
   thumbnailUrl?: string;
   imageUrls?: string[];
   typeValue?: string;
+  productId: number;
+  productName: string;
+  productSlug: string;
+  productTypeName?: string;
 }
 
 export interface StorefrontVariantDetail {

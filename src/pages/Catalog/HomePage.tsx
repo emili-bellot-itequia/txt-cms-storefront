@@ -3,14 +3,14 @@ import { Container, Row, Col, Form, InputGroup, Button, Spinner, Pagination } fr
 import { FaSearch } from 'react-icons/fa';
 import { useSearchParams } from 'react-router-dom';
 import MainLayout from '../../components/Layout/MainLayout';
-import ProductCard from '../../components/Product/ProductCard';
-import { getProducts } from '../../services/productService';
-import type { StorefrontProduct } from '../../types';
+import VariantCard from '../../components/Product/VariantCard';
+import { getVariantsPaged } from '../../services/productService';
+import type { StorefrontVariant } from '../../types';
 import useDebounce from '../../hooks/useDebounce';
 
 const HomePage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [products, setProducts] = useState<StorefrontProduct[]>([]);
+  const [variants, setVariants] = useState<StorefrontVariant[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -22,8 +22,8 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    getProducts(currentPage, 12, debouncedSearch, undefined, orderBy, 'asc')
-      .then(r => { setProducts(r.items); setTotalPages(r.totalPages); setTotalItems(r.totalItems); })
+    getVariantsPaged(currentPage, 12, debouncedSearch, undefined, orderBy, 'asc')
+      .then(r => { setVariants(r.items); setTotalPages(r.totalPages); setTotalItems(r.totalItems); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [currentPage, debouncedSearch, orderBy]);
@@ -37,13 +37,11 @@ const HomePage: React.FC = () => {
   return (
     <MainLayout>
       <Container className="py-4">
-        {/* Hero */}
         <div className="catalog-hero mb-4">
           <h1 className="catalog-title">Nuestros productos</h1>
-          <p className="catalog-subtitle text-muted">{totalItems} productos disponibles</p>
+          <p className="catalog-subtitle text-muted">{totalItems} referencias disponibles</p>
         </div>
 
-        {/* Filters */}
         <Row className="mb-4 align-items-center">
           <Col md={6}>
             <InputGroup>
@@ -64,25 +62,23 @@ const HomePage: React.FC = () => {
           </Col>
         </Row>
 
-        {/* Grid */}
         {loading ? (
           <div className="text-center py-5"><Spinner animation="border" variant="primary" /></div>
-        ) : products.length === 0 ? (
+        ) : variants.length === 0 ? (
           <div className="text-center py-5 text-muted">
             <p>No se encontraron productos{search ? ` para "${search}"` : ''}.</p>
             {search && <Button variant="outline-primary" onClick={() => setSearch('')}>Ver todos</Button>}
           </div>
         ) : (
           <Row xs={2} sm={2} md={3} lg={4} className="g-3">
-            {products.map(p => (
-              <Col key={p.id}>
-                <ProductCard product={p} />
+            {variants.map(v => (
+              <Col key={v.id}>
+                <VariantCard variant={v} />
               </Col>
             ))}
           </Row>
         )}
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="d-flex justify-content-center mt-4">
             <Pagination>

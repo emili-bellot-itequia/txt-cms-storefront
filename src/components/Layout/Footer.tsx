@@ -1,37 +1,189 @@
 import React from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import {
+  FaInstagram, FaFacebook, FaTiktok, FaPinterest,
+  FaTwitter, FaYoutube, FaLinkedin,
+} from 'react-icons/fa';
+import { useSiteSettings, type SiteSettings } from '../../contexts/SiteSettingsContext';
+import { usePaymentMethods } from '../../contexts/PaymentMethodsContext';
+import { usePartners } from '../../contexts/PartnersContext';
+import type { FooterColumn } from '../../services/siteSettingsService';
 
-const Footer: React.FC = () => (
-  <footer className="storefront-footer mt-5">
-    <Container>
-      <Row className="py-4">
-        <Col md={4} className="mb-3">
-          <h6 className="fw-bold">TXT Shop</h6>
-          <p className="text-muted small mb-0">Tu tienda de confianza.</p>
-        </Col>
-        <Col md={4} className="mb-3">
-          <h6 className="fw-bold">Información</h6>
-          <ul className="list-unstyled small">
-            <li><Link to="/catalog" className="footer-link">Catálogo</Link></li>
-            <li><Link to="/account" className="footer-link">Mi cuenta</Link></li>
-            <li><Link to="/account/orders" className="footer-link">Mis pedidos</Link></li>
-          </ul>
-        </Col>
-        <Col md={4} className="mb-3">
-          <h6 className="fw-bold">Ayuda</h6>
-          <ul className="list-unstyled small text-muted">
-            <li>Envíos en 24-48h</li>
-            <li>Devoluciones gratuitas</li>
-          </ul>
-        </Col>
-      </Row>
-      <hr />
-      <p className="text-center text-muted small py-2 mb-0">
-        © {new Date().getFullYear()} TXT Shop. Todos los derechos reservados.
-      </p>
-    </Container>
-  </footer>
-);
+const SOCIAL: { field: keyof SiteSettings; Icon: React.ElementType; label: string }[] = [
+  { field: 'instagramUrl', Icon: FaInstagram, label: 'Instagram' },
+  { field: 'facebookUrl', Icon: FaFacebook, label: 'Facebook' },
+  { field: 'tikTokUrl', Icon: FaTiktok, label: 'TikTok' },
+  { field: 'pinterestUrl', Icon: FaPinterest, label: 'Pinterest' },
+  { field: 'twitterUrl', Icon: FaTwitter, label: 'Twitter' },
+  { field: 'youtubeUrl', Icon: FaYoutube, label: 'YouTube' },
+  { field: 'linkedInUrl', Icon: FaLinkedin, label: 'LinkedIn' },
+];
+
+const LEGAL_LINKS = [
+  { text: 'Aviso Legal', slug: 'aviso-legal' },
+  { text: 'Términos y condiciones', slug: 'terminos-y-condiciones' },
+  { text: 'Protección de datos', slug: 'proteccion-de-datos' },
+  { text: 'Política de cookies', slug: 'politica-de-cookies' },
+  { text: 'Declaración de accesibilidad', slug: 'declaracion-de-accesibilidad' },
+];
+
+function FooterColContent({ col }: { col: FooterColumn }) {
+  const paymentMethods = usePaymentMethods();
+  const partners = usePartners();
+
+  if (col.type === 'partners') {
+    return (
+      <div className="footer-logos-grid">
+        {partners.map(p =>
+          p.websiteUrl ? (
+            <a key={p.id} href={p.websiteUrl} target="_blank" rel="noopener noreferrer" className="footer-logo-item" title={p.name}>
+              {p.logoUrl
+                ? <img src={p.logoUrl} alt={p.name} className="footer-logo-img" />
+                : <span className="footer-logo-placeholder">{p.name}</span>}
+            </a>
+          ) : (
+            <span key={p.id} className="footer-logo-item" title={p.name}>
+              {p.logoUrl
+                ? <img src={p.logoUrl} alt={p.name} className="footer-logo-img" />
+                : <span className="footer-logo-placeholder">{p.name}</span>}
+            </span>
+          )
+        )}
+        {partners.length === 0 && (
+          <span className="text-muted small">Sin partners configurados</span>
+        )}
+      </div>
+    );
+  }
+
+  if (col.type === 'paymentMethods') {
+    return (
+      <div className="footer-logos-grid">
+        {paymentMethods.map(m => (
+          <span key={m.id} className="footer-logo-item" title={m.name}>
+            {m.logoUrl
+              ? <img src={m.logoUrl} alt={m.name} className="footer-logo-img" />
+              : <span className="footer-logo-placeholder">{m.name}</span>}
+          </span>
+        ))}
+        {paymentMethods.length === 0 && (
+          <span className="text-muted small">Sin métodos configurados</span>
+        )}
+      </div>
+    );
+  }
+
+  if (col.type === 'logos') {
+    return (
+      <div className="footer-logos-grid">
+        {(col.logos ?? []).map((logo, i) =>
+          logo.href ? (
+            <a key={i} href={logo.href} target="_blank" rel="noopener noreferrer" className="footer-logo-item">
+              <img src={logo.imageUrl} alt={logo.alt} className="footer-logo-img" />
+            </a>
+          ) : (
+            <span key={i} className="footer-logo-item">
+              <img src={logo.imageUrl} alt={logo.alt} className="footer-logo-img" />
+            </span>
+          )
+        )}
+      </div>
+    );
+  }
+
+  if (col.type === 'features') {
+    return (
+      <ul className="list-unstyled footer-features-list">
+        {(col.features ?? []).map((feat, i) => (
+          <li key={i} className="footer-feature-item">
+            {feat.icon && <span className="footer-feature-icon">{feat.icon}</span>}
+            <span>{feat.text}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  // default: links
+  return (
+    <ul className="list-unstyled footer-col-links">
+      {(col.links ?? []).map((lnk, i) => (
+        <li key={i}>
+          {lnk.href.startsWith('/') || lnk.href.startsWith('#') ? (
+            <Link to={lnk.href} className="footer-link">{lnk.text}</Link>
+          ) : lnk.href ? (
+            <a href={lnk.href} target="_blank" rel="noopener noreferrer" className="footer-link">
+              {lnk.text}
+            </a>
+          ) : (
+            <span className="footer-link-plain">{lnk.text}</span>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const Footer: React.FC = () => {
+  const settings = useSiteSettings();
+  const activeSocials = SOCIAL.filter(s => settings[s.field]);
+  const visibleColumns = settings.footerColumns.filter(c => c.isVisible !== false);
+  const copyright = settings.copyright ||
+    `© ${new Date().getFullYear()} ${settings.siteName}. Todos los derechos reservados.`;
+
+  return (
+    <footer className="storefront-footer">
+      {/* Top columns */}
+      {visibleColumns.length > 0 && (
+        <div className="footer-top">
+          <Container>
+            <Row className="py-4 g-4">
+              {visibleColumns.map((col, i) => (
+                <Col key={i} xs={12} sm={6} md={4}>
+                  <h6 className="footer-col-title">{col.title}</h6>
+                  <FooterColContent col={col} />
+                </Col>
+              ))}
+            </Row>
+          </Container>
+        </div>
+      )}
+
+      {/* Bottom bar */}
+      <div className="footer-bottom">
+        <Container>
+          <div className="footer-bottom-inner">
+            <div className="footer-legal">
+              {LEGAL_LINKS.map((l, i) => (
+                <React.Fragment key={l.slug}>
+                  <Link to={`/pages/${l.slug}`} className="footer-legal-link">{l.text}</Link>
+                  {i < LEGAL_LINKS.length - 1 && <span className="footer-legal-sep">·</span>}
+                </React.Fragment>
+              ))}
+            </div>
+            {activeSocials.length > 0 && (
+              <div className="footer-social">
+                {activeSocials.map(({ field, Icon, label }) => (
+                  <a
+                    key={field}
+                    href={settings[field] as string}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="footer-social-btn"
+                    aria-label={label}
+                  >
+                    <Icon size={16} />
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+          <p className="footer-copyright">{copyright}</p>
+        </Container>
+      </div>
+    </footer>
+  );
+};
 
 export default Footer;
