@@ -6,6 +6,7 @@ export interface StorefrontProduct {
   description: string;
   price: number;
   originalPrice: number;
+  discountPercent: number;
   availableStock: number;
   thumbnailUrl?: string;
   imageUrls?: string[];
@@ -20,6 +21,7 @@ export interface StorefrontVariant {
   code: string;
   price: number;
   originalPrice: number;
+  discountPercent: number;
   availableStock: number;
   thumbnailUrl?: string;
   imageUrls?: string[];
@@ -33,6 +35,7 @@ export interface StorefrontVariantDetail {
   description: string;
   price: number;
   originalPrice: number;
+  discountPercent: number;
   availableStock: number;
   typeValue?: string;
   thumbnailUrl?: string;
@@ -48,6 +51,7 @@ export interface CartItem {
   variantId?: number;
   productName: string;
   productCode: string;
+  originalUnitPrice: number;
   unitPrice: number;
   quantity: number;
   subtotal: number;
@@ -59,6 +63,7 @@ export interface Cart {
   id: number;
   expiresAt: string;
   items: CartItem[];
+  discountPercent: number;
   total: number;
 }
 
@@ -71,6 +76,7 @@ export interface CheckoutRequest {
 export interface CheckoutResponse {
   clientSecret: string;
   amount: number;
+  shippingCost: number;
   currency: string;
 }
 

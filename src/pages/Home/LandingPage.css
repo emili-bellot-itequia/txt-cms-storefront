@@ -1,0 +1,160 @@
+/* ── Carousel ────────────────────────────────────────────────────────────── */
+.home-carousel .carousel-item {
+  background: #1a1a2e;
+}
+
+.home-carousel .carousel-control-prev-icon,
+.home-carousel .carousel-control-next-icon {
+  filter: drop-shadow(0 0 3px rgba(0,0,0,.8));
+  width: 2rem;
+  height: 2rem;
+}
+
+.home-carousel .carousel-indicators [data-bs-target] {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  opacity: .6;
+}
+
+.home-carousel .carousel-indicators .active {
+  opacity: 1;
+}
+
+/* ── Banner ──────────────────────────────────────────────────────────────── */
+.home-banner {
+  position: relative;
+  background-color: #1a1a2e;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.home-banner-overlay {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #fff;
+}
+
+.home-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1;
+}
+
+.home-banner-title {
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 800;
+  text-shadow: 0 2px 8px rgba(0,0,0,.5);
+  margin-bottom: 1rem;
+}
+
+.home-banner-subtitle {
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  text-shadow: 0 1px 4px rgba(0,0,0,.4);
+  margin-bottom: 2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ── Image Grid ──────────────────────────────────────────────────────────── */
+.home-image-grid-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  aspect-ratio: 1 / 1;
+  background: #f8f9fa;
+}
+
+.home-image-grid-item img {
+  transition: transform 0.3s ease;
+}
+
+.home-image-grid-item:hover img {
+  transform: scale(1.05);
+}
+
+.home-image-grid-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  font-size: 13px;
+  padding: 8px 12px;
+  text-align: center;
+}
+
+/* ── Featured Products ───────────────────────────────────────────────────── */
+.home-featured-bg {
+  background: #f8f9fa;
+}
+
+.home-featured-card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+  overflow: hidden;
+  transition: box-shadow .2s, transform .2s;
+}
+
+.home-featured-card:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,.1);
+  transform: translateY(-2px);
+}
+
+.home-featured-img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+}
+
+.home-featured-placeholder {
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  font-size: 40px;
+}
+
+.home-featured-outofstock {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.home-featured-name {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.home-featured-name a {
+  color: #212529;
+  text-decoration: none;
+}
+
+.home-featured-name a:hover {
+  color: var(--bs-primary);
+}

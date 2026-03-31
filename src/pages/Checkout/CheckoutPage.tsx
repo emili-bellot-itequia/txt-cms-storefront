@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Form, Button, Card, Alert, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Card, Alert, Spinner, Badge } from 'react-bootstrap';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useNavigate } from 'react-router-dom';
@@ -8,21 +8,24 @@ import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { checkout } from '../../services/cartService';
 import { getProfile } from '../../services/profileService';
+import { getApplicableShippingRate, type ApplicableShippingRate } from '../../services/shippingService';
 import type { CustomerAddress } from '../../types';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-// Inner form that uses Stripe hooks
 const PaymentForm: React.FC<{
   clientSecret: string;
   amount: number;
+  shippingCost: number;
   currency: string;
   onSuccess: () => void;
-}> = ({ amount, onSuccess }) => {
+}> = ({ amount, shippingCost, onSuccess }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
+
+  const subtotal = amount - shippingCost;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,10 +50,26 @@ const PaymentForm: React.FC<{
 
   return (
     <form onSubmit={handleSubmit}>
+      <div className="mb-3 p-3 bg-light rounded small">
+        <div className="d-flex justify-content-between mb-1">
+          <span className="text-muted">Subtotal productos</span>
+          <span>€{subtotal.toFixed(2)}</span>
+        </div>
+        <div className="d-flex justify-content-between mb-1">
+          <span className="text-muted">Gastos de envío</span>
+          <span>{shippingCost === 0 ? <span className="text-success">Gratis</span> : `€${shippingCost.toFixed(2)}`}</span>
+        </div>
+        <div className="d-flex justify-content-between fw-bold border-top pt-1 mt-1">
+          <span>Total</span>
+          <span>€{amount.toFixed(2)}</span>
+        </div>
+      </div>
       <PaymentElement className="mb-3" />
       {error && <Alert variant="danger" className="py-2">{error}</Alert>}
       <Button type="submit" variant="primary" size="lg" className="w-100" disabled={!stripe || processing}>
-        {processing ? <><Spinner size="sm" animation="border" className="me-2" />Procesando...</> : `Pagar €${amount.toFixed(2)}`}
+        {processing
+          ? <><Spinner size="sm" animation="border" className="me-2" />Procesando...</>
+          : `Pagar €${amount.toFixed(2)}`}
       </Button>
     </form>
   );
@@ -67,10 +86,13 @@ const CheckoutPage: React.FC = () => {
   const [notes, setNotes] = useState('');
   const [clientSecret, setClientSecret] = useState('');
   const [amount, setAmount] = useState(0);
+  const [confirmedShippingCost, setConfirmedShippingCost] = useState(0);
   const [currency, setCurrency] = useState('eur');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState<'details' | 'payment'>('details');
+  const [shippingRate, setShippingRate] = useState<ApplicableShippingRate | null | undefined>(undefined);
+  const [shippingLoading, setShippingLoading] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) { navigate('/login'); return; }
@@ -82,6 +104,26 @@ const CheckoutPage: React.FC = () => {
     }).catch(() => {});
   }, [isAuthenticated]);
 
+  // Fetch shipping rate whenever shipping address or cart changes
+  useEffect(() => {
+    if (!shippingId || !cart?.items?.length) {
+      setShippingRate(undefined);
+      return;
+    }
+    const addr = addresses.find(a => a.id === shippingId);
+    if (!addr?.country) { setShippingRate(undefined); return; }
+
+    const cartSubtotal = cart.items.reduce((sum, i) => sum + i.subtotal, 0);
+    setShippingLoading(true);
+    getApplicableShippingRate(addr.country, cartSubtotal).then(rate => {
+      setShippingRate(rate);
+    }).finally(() => setShippingLoading(false));
+  }, [shippingId, addresses, cart]);
+
+  const cartSubtotal = cart?.items.reduce((sum, i) => sum + i.subtotal, 0) ?? 0;
+  const estimatedShipping = shippingRate?.shippingCost ?? 0;
+  const estimatedTotal = cartSubtotal + estimatedShipping;
+
   const handleProceedToPayment = async () => {
     setLoading(true);
     setError('');
@@ -89,10 +131,12 @@ const CheckoutPage: React.FC = () => {
       const res = await checkout({ shippingAddressId: shippingId, billingAddressId: billingId, notes: notes || undefined });
       setClientSecret(res.clientSecret);
       setAmount(res.amount);
+      setConfirmedShippingCost(res.shippingCost ?? 0);
       setCurrency(res.currency);
       setStep('payment');
-    } catch (e: any) {
-      setError(e?.response?.data?.message ?? 'Error al iniciar el pago');
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { message?: string } } };
+      setError(err?.response?.data?.message ?? 'Error al iniciar el pago');
     } finally {
       setLoading(false);
     }
@@ -157,7 +201,7 @@ const CheckoutPage: React.FC = () => {
 
                   {error && <Alert variant="danger" className="py-2">{error}</Alert>}
 
-                  <Button variant="primary" size="lg" className="w-100" onClick={handleProceedToPayment} disabled={loading}>
+                  <Button variant="primary" size="lg" className="w-100" onClick={handleProceedToPayment} disabled={loading || !shippingId}>
                     {loading ? <><Spinner size="sm" animation="border" className="me-2" />Cargando...</> : 'Ir al pago'}
                   </Button>
                 </Card.Body>
@@ -170,6 +214,7 @@ const CheckoutPage: React.FC = () => {
                     <PaymentForm
                       clientSecret={clientSecret}
                       amount={amount}
+                      shippingCost={confirmedShippingCost}
                       currency={currency}
                       onSuccess={() => navigate('/checkout/success')}
                     />
@@ -187,15 +232,77 @@ const CheckoutPage: React.FC = () => {
                 <h5 className="fw-bold mb-3">Resumen del pedido</h5>
                 {cart.items.map(item => (
                   <div key={item.id} className="d-flex justify-content-between small mb-1">
-                    <span className="text-muted">{item.productName} x{item.quantity}</span>
+                    <span className="text-muted">{item.productName} x{item.quantity}m</span>
                     <span>€{item.subtotal.toFixed(2)}</span>
                   </div>
                 ))}
-                <hr />
-                <div className="d-flex justify-content-between fw-bold fs-5">
-                  <span>Total</span>
-                  <span>€{(cart.total ?? 0).toFixed(2)}</span>
-                </div>
+                <hr className="my-2" />
+
+                {step === 'payment' ? (
+                  // Use backend-confirmed amounts (discount already applied)
+                  <>
+                    <div className="d-flex justify-content-between small mb-1">
+                      <span className="text-muted">Subtotal</span>
+                      <span>€{(amount - confirmedShippingCost).toFixed(2)}</span>
+                    </div>
+                    <div className="d-flex justify-content-between small mb-2">
+                      <span className="text-muted">Gastos de envío</span>
+                      <span>{confirmedShippingCost === 0
+                        ? <span className="text-success fw-semibold">Gratis</span>
+                        : `€${confirmedShippingCost.toFixed(2)}`}
+                      </span>
+                    </div>
+                    <hr className="my-2" />
+                    <div className="d-flex justify-content-between fw-bold fs-5">
+                      <span>Total</span>
+                      <span>€{amount.toFixed(2)}</span>
+                    </div>
+                  </>
+                ) : (
+                  // Estimate before confirming
+                  <>
+                    <div className="d-flex justify-content-between small mb-1">
+                      <span className="text-muted">Subtotal</span>
+                      <span>€{cartSubtotal.toFixed(2)}</span>
+                    </div>
+                    <div className="d-flex justify-content-between small mb-2">
+                      <span className="text-muted">Gastos de envío</span>
+                      <span>
+                        {shippingLoading ? (
+                          <Spinner size="sm" animation="border" />
+                        ) : shippingRate == null ? (
+                          shippingId && shippingRate === null
+                            ? <Badge bg="warning" text="dark">No disponible</Badge>
+                            : <span className="text-muted">—</span>
+                        ) : shippingRate.isFree ? (
+                          <span className="text-success fw-semibold">Gratis</span>
+                        ) : (
+                          `€${shippingRate.shippingCost.toFixed(2)}`
+                        )}
+                      </span>
+                    </div>
+                    {shippingRate && shippingRate.freeShippingThreshold && !shippingRate.isFree && (
+                      <div className="small text-muted mb-2">
+                        Envío gratis a partir de <strong>€{shippingRate.freeShippingThreshold.toFixed(2)}</strong>
+                        {' '}(te faltan €{(shippingRate.freeShippingThreshold - cartSubtotal).toFixed(2)})
+                      </div>
+                    )}
+                    {shippingRate === null && shippingId && (
+                      <Alert variant="warning" className="py-2 small">
+                        No hay tarifa de envío disponible para este país. Contacta con nosotros.
+                      </Alert>
+                    )}
+                    <hr className="my-2" />
+                    <div className="d-flex justify-content-between fw-bold fs-5">
+                      <span>Total</span>
+                      <span>€{estimatedTotal.toFixed(2)}</span>
+                    </div>
+                  </>
+                )}
+
+                {shippingRate && (
+                  <div className="small text-muted mt-1">{shippingRate.name}</div>
+                )}
               </Card.Body>
             </Card>
           </Col>

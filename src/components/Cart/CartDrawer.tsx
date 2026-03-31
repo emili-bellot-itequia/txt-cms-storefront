@@ -65,7 +65,16 @@ const CartDrawer: React.FC = () => {
                   </div>
                   <div className="cart-item-info flex-grow-1">
                     <div className="cart-item-name">{item.productName}</div>
-                    <div className="cart-item-price">€{item.unitPrice.toFixed(2)}</div>
+                    <div className="cart-item-price">
+                      {item.unitPrice < item.originalUnitPrice && (
+                        <span style={{ textDecoration: 'line-through', color: '#aaa', marginRight: 4, fontSize: '0.8em' }}>
+                          €{item.originalUnitPrice.toFixed(2)}
+                        </span>
+                      )}
+                      <span style={item.unitPrice < item.originalUnitPrice ? { color: '#dc3545', fontWeight: 600 } : {}}>
+                        €{item.unitPrice.toFixed(2)}
+                      </span>
+                    </div>
                     <div className="cart-item-qty">
                       <button className="qty-btn" disabled={loading || item.quantity <= 1} onClick={() => updateItem(item.id, item.quantity - 1)}>
                         <FaMinus size={10} />
@@ -88,6 +97,12 @@ const CartDrawer: React.FC = () => {
 
             {/* Footer */}
             <div className="cart-footer">
+              {(cart!.discountPercent ?? 0) > 0 && (
+                <div className="d-flex justify-content-between small text-success mb-1">
+                  <span>Descuento ({cart!.discountPercent}%)</span>
+                  <span>−€{cart!.items.reduce((s, i) => s + (i.originalUnitPrice - i.unitPrice) * i.quantity, 0).toFixed(2)}</span>
+                </div>
+              )}
               <div className="d-flex justify-content-between fw-bold fs-5 mb-3">
                 <span>Total</span>
                 <span>€{(cart!.total ?? 0).toFixed(2)}</span>

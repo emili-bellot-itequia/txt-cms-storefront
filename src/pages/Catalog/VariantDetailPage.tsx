@@ -40,6 +40,7 @@ const VariantDetailPage: React.FC = () => {
   const images = variant.imageUrls.length ? variant.imageUrls : variant.thumbnailUrl ? [variant.thumbnailUrl] : [];
   const outOfStock = variant.availableStock <= 0;
   const hasDiscount = variant.originalPrice > variant.price;
+  const hasGroupDiscount = (variant.discountPercent ?? 0) > 0;
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseFloat(e.target.value);
@@ -95,11 +96,16 @@ const VariantDetailPage: React.FC = () => {
             <div className="text-muted small mb-3">Ref: {variant.code}</div>
 
             {/* Price */}
-            <div className="d-flex align-items-baseline gap-2 mb-3">
-              <span className="fs-3 fw-bold">€{variant.price.toFixed(2)}</span>
-              {hasDiscount && <span className="text-muted text-decoration-line-through">€{variant.originalPrice.toFixed(2)}</span>}
-              {hasDiscount && <Badge bg="danger">Oferta</Badge>}
+            <div className="d-flex align-items-baseline gap-2 flex-wrap mb-1">
+              <span className="fs-3 fw-bold text-danger">€{variant.price.toFixed(2)}</span>
+              {(hasDiscount || hasGroupDiscount) && (
+                <span className="text-muted text-decoration-line-through fs-5">€{variant.originalPrice.toFixed(2)}</span>
+              )}
+              {hasGroupDiscount
+                ? <Badge bg="success">Tu precio −{variant.discountPercent}%</Badge>
+                : hasDiscount && <Badge bg="danger">Oferta</Badge>}
             </div>
+            <div className="text-muted small mb-3">por metro</div>
 
             {/* Stock */}
             <div className="mb-3">

@@ -71,7 +71,16 @@ const CartPage: React.FC = () => {
                       <Col xs={9} sm={5}>
                         <div className="fw-semibold">{item.productName}</div>
                         <div className="text-muted small">{item.productCode}</div>
-                        <div className="text-muted small">€{item.unitPrice.toFixed(2)} / m</div>
+                        <div className="small">
+                          {item.unitPrice < item.originalUnitPrice && (
+                            <span className="text-muted text-decoration-line-through me-1">
+                              €{item.originalUnitPrice.toFixed(2)}
+                            </span>
+                          )}
+                          <span className={item.unitPrice < item.originalUnitPrice ? 'text-danger fw-semibold' : 'text-muted'}>
+                            €{item.unitPrice.toFixed(2)} / m
+                          </span>
+                        </div>
                       </Col>
                       <Col sm={3} className="d-flex align-items-center mt-2 mt-sm-0">
                         <Form.Control
@@ -109,6 +118,12 @@ const CartPage: React.FC = () => {
                       <span>€{item.subtotal.toFixed(2)}</span>
                     </div>
                   ))}
+                  {(cart!.discountPercent ?? 0) > 0 && (
+                    <div className="d-flex justify-content-between small text-success mb-1">
+                      <span>Descuento ({cart!.discountPercent}%)</span>
+                      <span>−€{(cart!.items.reduce((s, i) => s + (i.originalUnitPrice - i.unitPrice) * i.quantity, 0)).toFixed(2)}</span>
+                    </div>
+                  )}
                   <hr />
                   <div className="d-flex justify-content-between fw-bold fs-5 mb-3">
                     <span>Total</span>

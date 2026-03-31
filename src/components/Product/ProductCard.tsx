@@ -15,7 +15,9 @@ const ProductCard: React.FC<Props> = ({ product }) => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const outOfStock = product.availableStock <= 0;
-  const hasDiscount = product.originalPrice > product.price;
+  const hasSaleDiscount = product.originalPrice > product.price;
+  const hasGroupDiscount = (product.discountPercent ?? 0) > 0;
+  const hasDiscount = hasSaleDiscount || hasGroupDiscount;
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -30,7 +32,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
         {product.thumbnailUrl
           ? <Card.Img variant="top" src={product.thumbnailUrl} className="product-card-img" />
           : <div className="product-card-placeholder">📦</div>}
-        {hasDiscount && <Badge bg="danger" className="discount-badge">OFERTA</Badge>}
+        {hasDiscount && <Badge bg="danger" className="discount-badge">{hasGroupDiscount ? `−${product.discountPercent}%` : 'OFERTA'}</Badge>}
         {outOfStock && <div className="out-of-stock-overlay">Sin stock</div>}
       </Link>
       <Card.Body className="d-flex flex-column">
@@ -43,6 +45,9 @@ const ProductCard: React.FC<Props> = ({ product }) => {
             <span className="price-current">€{product.price.toFixed(2)}</span>
             {hasDiscount && <span className="price-original">€{product.originalPrice.toFixed(2)}</span>}
           </div>
+          {hasGroupDiscount && (
+            <div className="small text-success" style={{ fontSize: '0.75rem' }}>Tu precio (grupo -{product.discountPercent}%)</div>
+          )}
           <Button
             variant={outOfStock ? 'outline-secondary' : 'primary'}
             size="sm"

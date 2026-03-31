@@ -3,6 +3,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 
+import LandingPage from './pages/Home/LandingPage';
 import HomePage from './pages/Catalog/HomePage';
 import ProductDetailPage from './pages/Catalog/ProductDetailPage';
 import VariantDetailPage from './pages/Catalog/VariantDetailPage';
@@ -23,7 +24,7 @@ function App() {
         <CartProvider>
           <Routes>
             {/* Public */}
-            <Route path="/" element={<Navigate to="/catalog" replace />} />
+            <Route path="/" element={<LandingPage />} />
             <Route path="/catalog" element={<HomePage />} />
             <Route path="/product/:slug" element={<ProductDetailPage />} />
             <Route path="/variant/:id" element={<VariantDetailPage />} />
@@ -42,7 +43,7 @@ function App() {
             </Route>
 
             {/* Fallback */}
-            <Route path="*" element={<Navigate to="/catalog" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </CartProvider>
       </AuthProvider>
