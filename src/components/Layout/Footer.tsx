@@ -22,10 +22,9 @@ const SOCIAL: { field: keyof SiteSettings; Icon: React.ElementType; label: strin
 
 const LEGAL_LINKS = [
   { text: 'Aviso Legal', slug: 'aviso-legal' },
-  { text: 'Términos y condiciones', slug: 'terminos-y-condiciones' },
+  { text: 'Términos y condiciones', slug: 'terminos-condiciones' },
   { text: 'Protección de datos', slug: 'proteccion-de-datos' },
   { text: 'Política de cookies', slug: 'politica-de-cookies' },
-  { text: 'Declaración de accesibilidad', slug: 'declaracion-de-accesibilidad' },
 ];
 
 function FooterColContent({ col }: { col: FooterColumn }) {
@@ -34,7 +33,7 @@ function FooterColContent({ col }: { col: FooterColumn }) {
 
   if (col.type === 'partners') {
     return (
-      <div className="footer-logos-grid">
+      <div className="footer-logos-list">
         {partners.map(p =>
           p.websiteUrl ? (
             <a key={p.id} href={p.websiteUrl} target="_blank" rel="noopener noreferrer" className="footer-logo-item" title={p.name}>
@@ -59,7 +58,7 @@ function FooterColContent({ col }: { col: FooterColumn }) {
 
   if (col.type === 'paymentMethods') {
     return (
-      <div className="footer-logos-grid">
+      <div className="footer-logos-list">
         {paymentMethods.map(m => (
           <span key={m.id} className="footer-logo-item" title={m.name}>
             {m.logoUrl
@@ -76,7 +75,7 @@ function FooterColContent({ col }: { col: FooterColumn }) {
 
   if (col.type === 'logos') {
     return (
-      <div className="footer-logos-grid">
+      <div className="footer-logos-list">
         {(col.logos ?? []).map((logo, i) =>
           logo.href ? (
             <a key={i} href={logo.href} target="_blank" rel="noopener noreferrer" className="footer-logo-item">
@@ -157,7 +156,7 @@ const Footer: React.FC = () => {
             <div className="footer-legal">
               {LEGAL_LINKS.map((l, i) => (
                 <React.Fragment key={l.slug}>
-                  <Link to={`/pages/${l.slug}`} className="footer-legal-link">{l.text}</Link>
+                  <Link to={`/${l.slug}`} className="footer-legal-link">{l.text}</Link>
                   {i < LEGAL_LINKS.length - 1 && <span className="footer-legal-sep">·</span>}
                 </React.Fragment>
               ))}

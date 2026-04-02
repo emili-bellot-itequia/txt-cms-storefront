@@ -39,6 +39,7 @@ function App() {
               <Route path="/variant/:id" element={<VariantDetailPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/pages/:slug" element={<PageCatalogPage />} />
+              <Route path="/:slug" element={<PageCatalogPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
 

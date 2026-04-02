@@ -2,9 +2,12 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { getSiteSettings, type SiteSettings } from '../services/siteSettingsService';
 export type { SiteSettings };
 
+const DEFAULT_BRAND_COLOR = '#06b773';
+
 const DEFAULT: SiteSettings = {
   siteName: 'TXT Shop',
   logoUrl: '',
+  brandColor: DEFAULT_BRAND_COLOR,
   siteDescription: '',
   copyright: '',
   footerColumns: [],
@@ -17,7 +20,12 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   useEffect(() => {
     getSiteSettings()
-      .then(data => setSettings({ ...DEFAULT, ...data }))
+      .then(data => {
+        const merged = { ...DEFAULT, ...data };
+        setSettings(merged);
+        const color = merged.brandColor || DEFAULT_BRAND_COLOR;
+        document.documentElement.style.setProperty('--brand-color', color);
+      })
       .catch(() => {/* use defaults */});
   }, []);
 

@@ -177,6 +177,35 @@ export interface StorefrontPageItem {
   order: number;
 }
 
+export interface BlockStyle {
+  textAlign?: 'left' | 'center' | 'right';
+  color?: string;
+  backgroundColor?: string;
+  fontSize?: 'sm' | 'base' | 'lg' | 'xl' | '2xl';
+  fontWeight?: 'normal' | 'semibold' | 'bold';
+  fontStyle?: 'normal' | 'italic';
+  textDecoration?: 'none' | 'underline';
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+  letterSpacing?: 'normal' | 'wide' | 'wider';
+}
+
+export interface StorefrontPageBlock {
+  id: number;
+  type: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  config: any;
+  sortOrder: number;
+}
+
+export interface StorefrontChildPage {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  type: string;
+  imageUrl?: string;
+}
+
 export interface StorefrontPageDetail {
   id: number;
   name: string;
@@ -189,6 +218,8 @@ export interface StorefrontPageDetail {
   totalItems: number;
   totalPages: number;
   currentPage: number;
+  blocks: StorefrontPageBlock[];
+  childPages: StorefrontChildPage[];
 }
 
 export interface PaginatedResponse<T> {

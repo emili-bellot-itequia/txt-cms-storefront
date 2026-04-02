@@ -1,32 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Spinner, Pagination, Alert } from 'react-bootstrap';
+import { Container, Spinner, Pagination, Alert } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import MainLayout from '../../components/Layout/MainLayout';
-import VariantCard from '../../components/Product/VariantCard';
+import PageBlockRenderer from '../../components/common/PageBlockRenderer';
 import { getPageBySlug } from '../../services/pageService';
-import type { StorefrontPageDetail, StorefrontPageItem, StorefrontVariant } from '../../types';
+import type { StorefrontPageDetail } from '../../types';
 
 const PAGE_SIZE = 12;
-
-function toVariant(item: StorefrontPageItem): StorefrontVariant {
-  const discountPercent = item.originalPrice > 0 && item.originalPrice > item.price
-    ? Math.round((1 - item.price / item.originalPrice) * 10000) / 100
-    : 0;
-  return {
-    id: item.variantId,
-    name: item.name,
-    code: item.code,
-    price: item.price,
-    originalPrice: item.originalPrice,
-    discountPercent,
-    availableStock: item.availableStock,
-    thumbnailUrl: item.thumbnailUrl,
-    typeValue: item.typeValue,
-    productId: item.productId,
-    productName: item.name,
-    productSlug: item.productSlug,
-  };
-}
 
 const PageCatalogPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -82,35 +62,22 @@ const PageCatalogPage: React.FC = () => {
       </div>
 
       <Container className="pb-5">
-        {pageDetail.totalItems === 0 ? (
-          <p className="text-muted text-center py-5">No hay productos en esta sección.</p>
-        ) : (
-          <>
-            <p className="text-muted small mb-3">
-              {pageDetail.totalItems} artículo{pageDetail.totalItems !== 1 ? 's' : ''}
-            </p>
-            <Row xs={2} sm={2} md={3} lg={4} className="g-3">
-              {pageDetail.items.map(item => (
-                <Col key={item.variantId}>
-                  <VariantCard variant={toVariant(item)} />
-                </Col>
-              ))}
-            </Row>
+        {pageDetail.blocks?.length > 0 && (
+          <PageBlockRenderer blocks={pageDetail.blocks} pageDetail={pageDetail} />
+        )}
 
-            {pageDetail.totalPages > 1 && (
-              <div className="d-flex justify-content-center mt-4">
-                <Pagination>
-                  <Pagination.Prev disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} />
-                  {Array.from({ length: pageDetail.totalPages }, (_, i) => (
-                    <Pagination.Item key={i + 1} active={i + 1 === currentPage} onClick={() => setCurrentPage(i + 1)}>
-                      {i + 1}
-                    </Pagination.Item>
-                  ))}
-                  <Pagination.Next disabled={currentPage === pageDetail.totalPages} onClick={() => setCurrentPage(p => p + 1)} />
-                </Pagination>
-              </div>
-            )}
-          </>
+        {pageDetail.totalPages > 1 && (
+          <div className="d-flex justify-content-center mt-4">
+            <Pagination>
+              <Pagination.Prev disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} />
+              {Array.from({ length: pageDetail.totalPages }, (_, i) => (
+                <Pagination.Item key={i + 1} active={i + 1 === currentPage} onClick={() => setCurrentPage(i + 1)}>
+                  {i + 1}
+                </Pagination.Item>
+              ))}
+              <Pagination.Next disabled={currentPage === pageDetail.totalPages} onClick={() => setCurrentPage(p => p + 1)} />
+            </Pagination>
+          </div>
         )}
       </Container>
     </MainLayout>

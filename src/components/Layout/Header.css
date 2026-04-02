@@ -17,7 +17,7 @@
   text-decoration: none;
   font-size: 13px;
 }
-.topbar-link:hover { color: var(--bs-primary); }
+.topbar-link:hover { color: var(--brand-color); }
 
 .topbar-dropdown .dropdown-toggle {
   color: #495057;
@@ -35,7 +35,7 @@
 
 .brand { font-size: 1.4rem; font-weight: 800; text-decoration: none; }
 .brand-txt { color: #212529; }
-.brand-cms { color: var(--bs-primary); }
+.brand-cms { color: var(--brand-color); }
 .brand-logo { height: 80px; width: auto; max-width: 160px; object-fit: contain; }
 
 .header-search { max-width: 460px; width: 100%; }
@@ -49,7 +49,7 @@
   cursor: pointer;
   transition: color .2s;
 }
-.cart-btn:hover { color: var(--bs-primary); }
+.cart-btn:hover { color: var(--brand-color); }
 
 .cart-badge {
   position: absolute;
@@ -101,7 +101,7 @@
 }
 .nav-menu-link:hover,
 .nav-menu-item.is-active .nav-menu-link {
-  color: var(--bs-primary);
+  color: var(--brand-color);
   text-decoration: none;
 }
 
@@ -112,7 +112,7 @@
   left: 16px;
   right: 16px;
   height: 2px;
-  background: var(--bs-primary);
+  background: var(--brand-color);
   opacity: 0;
   transition: opacity .15s;
 }
@@ -127,7 +127,7 @@
   left: 0;
   right: 0;
   background: #fff;
-  border-top: 2px solid var(--bs-primary);
+  border-top: 2px solid var(--brand-color);
   border-bottom: 1px solid #e9ecef;
   box-shadow: 0 8px 24px rgba(0,0,0,.10);
   animation: megaFadeIn .15s ease;
@@ -156,7 +156,7 @@
   letter-spacing: .6px;
   transition: color .15s;
 }
-.mega-section-title:hover { color: var(--bs-primary); }
+.mega-section-title:hover { color: var(--brand-color); }
 
 .mega-columns {
   display: flex;
@@ -184,9 +184,9 @@
   transition: color .15s, border-color .15s;
 }
 .mega-link:hover {
-  color: var(--bs-primary);
+  color: var(--brand-color);
   text-decoration: none;
-  border-bottom-color: var(--bs-primary);
+  border-bottom-color: var(--brand-color);
 }
 
 /* Mega panel body layout */
@@ -228,4 +228,4 @@
   color: #212529;
   transition: color .15s;
 }
-.mega-image-wrap:hover .mega-image-label { color: var(--bs-primary); }
+.mega-image-wrap:hover .mega-image-label { color: var(--brand-color); }

@@ -3,17 +3,18 @@ import { Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { getMenu } from '../../services/pageService';
 import type { StorefrontMenuItem } from '../../types';
+import { pageUrl } from '../../utils/pageUrl';
 
 function resolveHref(item: StorefrontMenuItem): string {
-  if (item.type === 'ExternalLink' && item.externalUrl) return item.externalUrl;
-  return `/pages/${item.slug}`;
+  if (item.externalUrl) return item.externalUrl;
+  return pageUrl(item.type, item.slug);
 }
 
 const COLS = 4; // max columns in the mega panel
 
 const MegaPanel: React.FC<{ item: StorefrontMenuItem; onClose: () => void }> = ({ item, onClose }) => {
   const href = resolveHref(item);
-  const isExternal = item.type === 'ExternalLink';
+  const isExternal = !!item.externalUrl;
   const children = item.children;
 
   // Split children into columns of max ~6 items each
@@ -48,7 +49,7 @@ const MegaPanel: React.FC<{ item: StorefrontMenuItem; onClose: () => void }> = (
                     <ul key={ci} className="mega-col">
                       {col.map(child => {
                         const childHref = resolveHref(child);
-                        const childExt = child.type === 'ExternalLink';
+                        const childExt = !!child.externalUrl;
                         return (
                           <li key={child.id}>
                             {childExt ? (
@@ -120,7 +121,7 @@ const NavMenu: React.FC = () => {
         <ul className="nav-menu-list">
           {items.map(item => {
             const href = resolveHref(item);
-            const isExt = item.type === 'ExternalLink';
+            const isExt = !!item.externalUrl;
             const hasChildren = item.children.length > 0;
             const isActive = activeId === item.id;
 

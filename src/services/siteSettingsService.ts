@@ -31,6 +31,7 @@ export interface FooterColumn {
 export interface SiteSettings {
   siteName: string;
   logoUrl?: string;
+  brandColor?: string;
   siteDescription: string;
   copyright: string;
   instagramUrl?: string;
