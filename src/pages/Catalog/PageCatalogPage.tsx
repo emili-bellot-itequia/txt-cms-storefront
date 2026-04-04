@@ -50,18 +50,8 @@ const PageCatalogPage: React.FC = () => {
 
   return (
     <MainLayout>
-      <div className="bg-light border-bottom py-4 mb-4">
-        <Container>
-          {pageDetail.imageUrl && (
-            <img src={pageDetail.imageUrl} alt={pageDetail.name} className="mb-3 rounded"
-              style={{ maxHeight: 200, maxWidth: '100%', objectFit: 'cover', width: '100%' }} />
-          )}
-          <h1 className="fw-bold mb-1">{pageDetail.name}</h1>
-          {pageDetail.description && <p className="text-muted mb-0">{pageDetail.description}</p>}
-        </Container>
-      </div>
-
       <Container className="pb-5">
+        <h1 className="fw-bold my-4">{pageDetail.name}</h1>
         {pageDetail.blocks?.length > 0 && (
           <PageBlockRenderer blocks={pageDetail.blocks} pageDetail={pageDetail} />
         )}

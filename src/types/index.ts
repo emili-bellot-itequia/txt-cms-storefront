@@ -47,6 +47,8 @@ export interface StorefrontVariantDetail {
   productId: number;
   productName: string;
   productSlug: string;
+  width?: number;
+  composition?: string;
 }
 
 export interface CartItem {

@@ -2,6 +2,7 @@ import React from 'react';
 import { Row, Col } from 'react-bootstrap';
 import type { StorefrontPageBlock, StorefrontPageDetail, BlockStyle } from '../../types';
 import { pageUrl } from '../../utils/pageUrl';
+import VariantCard from '../Product/VariantCard';
 
 // ─── Style helpers ────────────────────────────────────────────────────────────
 const FONT_SIZE: Record<string, string> = {
@@ -212,17 +213,20 @@ const ProductsBlock: React.FC<{ config: any; pageDetail?: StorefrontPageDetail }
       <Row xs={2} sm={cols > 2 ? 3 : 2} md={cols} className="g-3">
         {items.map(item => (
           <Col key={item.variantId}>
-            <a href={`/products/${item.productSlug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <div style={{ border: '1px solid #dee2e6', borderRadius: 8, overflow: 'hidden', height: '100%' }}>
-                {item.thumbnailUrl && (
-                  <img src={item.thumbnailUrl} alt={item.name} style={{ width: '100%', height: 200, objectFit: 'cover' }} />
-                )}
-                <div style={{ padding: '0.75rem' }}>
-                  <div style={{ fontWeight: 600, marginBottom: 2 }}>{item.name}</div>
-                  <div style={{ color: '#0d6efd', fontWeight: 700 }}>{item.price.toFixed(2)} €</div>
-                </div>
-              </div>
-            </a>
+            <VariantCard variant={{
+              id: item.variantId,
+              name: item.name,
+              code: item.code,
+              price: item.price,
+              originalPrice: item.originalPrice,
+              discountPercent: 0,
+              availableStock: item.availableStock,
+              thumbnailUrl: item.thumbnailUrl,
+              typeValue: item.typeValue,
+              productId: item.productId,
+              productName: item.name,
+              productSlug: item.productSlug,
+            }} />
           </Col>
         ))}
       </Row>

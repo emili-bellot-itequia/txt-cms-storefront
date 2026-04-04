@@ -16,7 +16,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="d-flex flex-column min-vh-100">
       <Header />
-      <main className="flex-grow-1">
+      <main className="flex-grow-1 mb-3">
         {children}
       </main>
       <Footer />

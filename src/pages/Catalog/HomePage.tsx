@@ -16,6 +16,10 @@ const HomePage: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const [search, setSearch] = useState(searchParams.get('search') ?? '');
+
+  useEffect(() => {
+    setSearch(searchParams.get('search') ?? '');
+  }, [searchParams]);
   const [orderBy, setOrderBy] = useState('name');
   const [currentPage, setCurrentPage] = useState(1);
   const debouncedSearch = useDebounce(search, 400);

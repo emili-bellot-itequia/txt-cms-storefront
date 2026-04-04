@@ -19,7 +19,9 @@ const Header: React.FC = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (search.trim()) navigate(`/catalog?search=${encodeURIComponent(search.trim())}`);
+    if (!search.trim()) return;
+    navigate(`/catalog?search=${encodeURIComponent(search.trim())}`);
+    setSearch('');
   };
 
   return (

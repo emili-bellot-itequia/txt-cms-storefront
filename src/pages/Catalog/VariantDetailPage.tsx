@@ -143,6 +143,31 @@ const VariantDetailPage: React.FC = () => {
 
             <hr />
             <div className="text-muted" style={{ whiteSpace: 'pre-line' }}>{variant.description}</div>
+
+            {(variant.width > 0 || variant.composition) && (
+              <table className="table table-sm mt-3" style={{ fontSize: '0.875rem' }}>
+                <tbody>
+                  {variant.width > 0 && (
+                    <tr>
+                      <td className="text-muted fw-semibold" style={{ width: 140 }}>Ancho</td>
+                      <td>{variant.width} cm</td>
+                    </tr>
+                  )}
+                  {variant.composition && (() => {
+                    try {
+                      const items: { material: string; percentage: number }[] = JSON.parse(variant.composition);
+                      if (!items.length) return null;
+                      return (
+                        <tr>
+                          <td className="text-muted fw-semibold align-top">Composición</td>
+                          <td>{items.map(i => `${i.material} ${i.percentage}%`).join(' · ')}</td>
+                        </tr>
+                      );
+                    } catch { return null; }
+                  })()}
+                </tbody>
+              </table>
+            )}
           </Col>
         </Row>
       </Container>

@@ -201,7 +201,7 @@ body {
 
 /* Features column */
 .storefront-footer .footer-features-list { display: flex; flex-direction: column; gap: 8px; }
-.storefront-footer .footer-feature-item { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #495057; }
+.storefront-footer .footer-feature-item { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: white; font-weight: bold;}
 .storefront-footer .footer-feature-icon { font-size: 16px; flex-shrink: 0; line-height: 1.3; }
 
 /* Payment method logo without image */
