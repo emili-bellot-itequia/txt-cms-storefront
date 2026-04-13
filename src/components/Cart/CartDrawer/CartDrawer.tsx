@@ -2,20 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { Offcanvas, Button } from 'react-bootstrap';
 import { FaTrash, FaMinus, FaPlus, FaShoppingBag } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../../contexts/CartContext';
+import { useTranslation } from 'react-i18next';
+import { useCart } from '../../../contexts/CartContext';
 import './CartDrawer.css';
 
 const CartDrawer: React.FC = () => {
+  const { t } = useTranslation();
   const { cart, drawerOpen, closeDrawer, updateItem, removeItem, loading } = useCart();
   const navigate = useNavigate();
   const [timeLeft, setTimeLeft] = useState('');
 
-  // Countdown timer
   useEffect(() => {
     if (!cart?.expiresAt) { setTimeLeft(''); return; }
     const tick = () => {
       const diff = new Date(cart.expiresAt).getTime() - Date.now();
-      if (diff <= 0) { setTimeLeft('Expirado'); return; }
+      if (diff <= 0) { setTimeLeft(t('cart.expired')); return; }
       const m = Math.floor(diff / 60000);
       const s = Math.floor((diff % 60000) / 1000);
       setTimeLeft(`${m}:${s.toString().padStart(2, '0')}`);
@@ -23,7 +24,7 @@ const CartDrawer: React.FC = () => {
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [cart?.expiresAt]);
+  }, [cart?.expiresAt, t]);
 
   const isEmpty = !cart?.items?.length;
 
@@ -32,29 +33,27 @@ const CartDrawer: React.FC = () => {
       <Offcanvas.Header closeButton>
         <Offcanvas.Title className="fw-bold">
           <FaShoppingBag className="me-2" />
-          Mi carrito
+          {t('cart.title')}
         </Offcanvas.Title>
       </Offcanvas.Header>
 
       <Offcanvas.Body className="d-flex flex-column">
-        {/* Countdown */}
         {!isEmpty && timeLeft && (
-          <div className={`cart-countdown mb-3 ${timeLeft === 'Expirado' ? 'expired' : ''}`}>
-            🕐 Reserva expira en: <strong>{timeLeft}</strong>
+          <div className={`cart-countdown mb-3 ${timeLeft === t('cart.expired') ? 'expired' : ''}`}>
+            🕐 {t('cart.reserveExpires')} <strong>{timeLeft}</strong>
           </div>
         )}
 
         {isEmpty ? (
           <div className="text-center text-muted my-auto">
             <FaShoppingBag size={48} className="mb-3 opacity-25" />
-            <p>Tu carrito está vacío</p>
+            <p>{t('cart.empty')}</p>
             <Button variant="primary" onClick={() => { closeDrawer(); navigate('/catalog'); }}>
-              Ver catálogo
+              {t('cart.browseCatalog')}
             </Button>
           </div>
         ) : (
           <>
-            {/* Items */}
             <div className="cart-items flex-grow-1">
               {cart!.items.map(item => (
                 <div key={item.id} className="cart-item">
@@ -95,23 +94,22 @@ const CartDrawer: React.FC = () => {
               ))}
             </div>
 
-            {/* Footer */}
             <div className="cart-footer">
               {(cart!.discountPercent ?? 0) > 0 && (
                 <div className="d-flex justify-content-between small text-success mb-1">
-                  <span>Descuento ({cart!.discountPercent}%)</span>
+                  <span>{t('cart.discount', { percent: cart!.discountPercent })}</span>
                   <span>−€{cart!.items.reduce((s, i) => s + (i.originalUnitPrice - i.unitPrice) * i.quantity, 0).toFixed(2)}</span>
                 </div>
               )}
               <div className="d-flex justify-content-between fw-bold fs-5 mb-3">
-                <span>Total</span>
+                <span>{t('cart.total')}</span>
                 <span>€{(cart!.total ?? 0).toFixed(2)}</span>
               </div>
               <Button variant="primary" size="lg" className="w-100 mb-2" onClick={() => { closeDrawer(); navigate('/checkout'); }}>
-                Finalizar compra
+                {t('cart.checkout')}
               </Button>
               <Button variant="outline-secondary" className="w-100" as={Link as any} to="/cart" onClick={closeDrawer}>
-                Ver carrito completo
+                {t('cart.viewFull')}
               </Button>
             </div>
           </>

@@ -1,8 +1,9 @@
-import React from 'react';
-import { Row, Col } from 'react-bootstrap';
+import React, { type JSX } from 'react';
+import { Row, Col, Carousel } from 'react-bootstrap';
 import type { StorefrontPageBlock, StorefrontPageDetail, BlockStyle } from '../../types';
 import { pageUrl } from '../../utils/pageUrl';
-import VariantCard from '../Product/VariantCard';
+import VariantCard from '../Product/VariantCard/VariantCard';
+import './PageBlockRenderer.css';
 
 // ─── Style helpers ────────────────────────────────────────────────────────────
 const FONT_SIZE: Record<string, string> = {
@@ -40,22 +41,58 @@ const HeaderBlock: React.FC<{ config: any }> = ({ config }) => {
 };
 
 const ParagraphBlock: React.FC<{ config: any }> = ({ config }) => (
-  <p style={{ whiteSpace: 'pre-wrap', ...buildStyle(config.style) }}>{config.text}</p>
+  <div
+    className="rich-text"
+    style={buildStyle(config.style)}
+    dangerouslySetInnerHTML={{ __html: config.text ?? '' }}
+  />
 );
+
+const HeaderParagraphBlock: React.FC<{ config: any }> = ({ config }) => {
+  const lvl = config.level;
+  let Tag: keyof JSX.IntrinsicElements = 'h2';
+  if (typeof lvl === 'number') {
+    const numericTags = ['h2', 'h3', 'h4', 'h5', 'h6'];
+    Tag = (numericTags[lvl - 1] ?? 'h2') as keyof JSX.IntrinsicElements;
+  } else {
+    const s = String(lvl ?? 'h2').toLowerCase();
+    if (/^h[1-6]$/.test(s)) Tag = s as keyof JSX.IntrinsicElements;
+  }
+  const headerText = config.headerText ?? config.header ?? '';
+  const paragraphText = config.paragraphText ?? config.text ?? '';
+  return (
+    <div style={buildStyle(config.style)}>
+      <Tag>{headerText}</Tag>
+      {paragraphText && <div className="rich-text pbr-header-paragraph-text" dangerouslySetInnerHTML={{ __html: paragraphText }} />}
+    </div>
+  );
+};
+
+const ListBlock: React.FC<{ config: any }> = ({ config }) => {
+  const rawItems = typeof config.items === 'string'
+    ? config.items
+    : Array.isArray(config.items)
+      ? config.items.join('\n')
+      : '';
+  const items = rawItems.split('\n').map((item: string) => item.trim()).filter(Boolean);
+  if (items.length === 0) return null;
+  const Tag = config.variant === 'ordered' ? 'ol' : 'ul';
+  return (
+    <Tag className="pbr-list" style={buildStyle(config.style)}>
+      {items.map((item: string, index: number) => (
+        <li key={index}>{item}</li>
+      ))}
+    </Tag>
+  );
+};
 
 const ImageBlock: React.FC<{ config: any }> = ({ config }) => {
   if (!config.imageUrl) return null;
-  const img = (
-    <img
-      src={config.imageUrl}
-      alt={config.altText ?? ''}
-      style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
-    />
-  );
+  const img = <img src={config.imageUrl} alt={config.altText ?? ''} />;
   return (
-    <figure style={{ margin: 0, ...buildStyle(config.style) }}>
+    <figure className="pbr-image" style={buildStyle(config.style)}>
       {config.linkUrl ? <a href={config.linkUrl} target="_blank" rel="noopener noreferrer">{img}</a> : img}
-      {config.caption && <figcaption style={{ fontSize: '0.85rem', color: '#6c757d', marginTop: 4 }}>{config.caption}</figcaption>}
+      {config.caption && <figcaption className="pbr-image-caption">{config.caption}</figcaption>}
     </figure>
   );
 };
@@ -64,13 +101,13 @@ const ImageTextBlock: React.FC<{ config: any }> = ({ config }) => {
   const imageLeft = (config.imagePosition ?? 'left') === 'left';
   const imgCol = config.imageUrl ? (
     <Col md={5}>
-      <img src={config.imageUrl} alt={config.title ?? ''} style={{ maxWidth: '100%', height: 'auto', borderRadius: 4 }} />
+      <img src={config.imageUrl} alt={config.title ?? ''} className="pbr-image-text-img" />
     </Col>
   ) : null;
   const textCol = (
     <Col md={config.imageUrl ? 7 : 12} style={buildStyle(config.style)}>
       {config.title && <h3>{config.title}</h3>}
-      {config.text && <p style={{ whiteSpace: 'pre-wrap' }}>{config.text}</p>}
+      {config.text && <div className="rich-text" dangerouslySetInnerHTML={{ __html: config.text }} />}
       {config.buttonText && config.buttonUrl && (
         <a href={config.buttonUrl} className="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer">
           {config.buttonText}
@@ -100,9 +137,9 @@ const GalleryBlock: React.FC<{ config: any }> = ({ config }) => {
           <Col key={i}>
             {img.linkUrl
               ? <a href={img.linkUrl} target="_blank" rel="noopener noreferrer">
-                  <img src={img.imageUrl} alt={img.altText ?? ''} style={{ width: '100%', height: 160, objectFit: 'cover', borderRadius: 4 }} />
+                  <img src={img.imageUrl} alt={img.altText ?? ''} className="pbr-gallery-img" />
                 </a>
-              : <img src={img.imageUrl} alt={img.altText ?? ''} style={{ width: '100%', height: 160, objectFit: 'cover', borderRadius: 4 }} />
+              : <img src={img.imageUrl} alt={img.altText ?? ''} className="pbr-gallery-img" />
             }
           </Col>
         ))}
@@ -113,9 +150,9 @@ const GalleryBlock: React.FC<{ config: any }> = ({ config }) => {
 
 const FormFieldBlock: React.FC<{ config: any }> = ({ config }) => (
   <div style={buildStyle(config.style)}>
-    <label style={{ display: 'block', fontWeight: 500, marginBottom: 4 }}>
+    <label className="pbr-form-label">
       {config.label}
-      {config.required && <span style={{ color: '#dc3545', marginLeft: 2 }}>*</span>}
+      {config.required && <span className="pbr-form-required">*</span>}
     </label>
     {config.fieldType === 'textarea' ? (
       <textarea
@@ -147,35 +184,38 @@ const FormFieldBlock: React.FC<{ config: any }> = ({ config }) => (
   </div>
 );
 
-const BannerBlock: React.FC<{ config: any }> = ({ config }) => (
-  <div
-    style={{
-      position: 'relative',
-      minHeight: 300,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundImage: config.imageUrl ? `url(${config.imageUrl})` : undefined,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundColor: config.imageUrl ? undefined : '#343a40',
-      borderRadius: 8,
-      overflow: 'hidden',
-      ...buildStyle(config.style),
-    }}
-  >
-    {config.imageUrl && (
-      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)' }} />
-    )}
-    <div style={{ position: 'relative', textAlign: 'center', color: '#fff', padding: '2rem' }}>
-      {config.title && <h2 style={{ fontWeight: 700, marginBottom: '0.5rem' }}>{config.title}</h2>}
-      {config.subtitle && <p style={{ fontSize: '1.1rem', marginBottom: '1.5rem', opacity: 0.9 }}>{config.subtitle}</p>}
-      {config.ctaText && config.ctaUrl && (
-        <a href={config.ctaUrl} className="btn btn-light btn-lg">{config.ctaText}</a>
-      )}
-    </div>
-  </div>
-);
+const BannerBlock: React.FC<{ config: any }> = ({ config }) => {
+  const slides: any[] = config.slides ?? [];
+  if (slides.length === 0) return null;
+
+  const height = config.height ?? 500;
+  return (
+    <Carousel style={buildStyle(config.style)}>
+      {slides.map((slide, i) => (
+        <Carousel.Item key={i}>
+          <div
+            className="pbr-banner"
+            style={{
+              backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined,
+              backgroundColor: slide.imageUrl ? undefined : '#343a40',
+              height,
+              minHeight: height,
+            }}
+          >
+            {slide.imageUrl && <div className="pbr-banner-overlay" />}
+            <div className="pbr-banner-content">
+              {slide.title && <h2 className="pbr-banner-title">{slide.title}</h2>}
+              {slide.subtitle && <p className="pbr-banner-subtitle">{slide.subtitle}</p>}
+              {slide.buttonText && slide.buttonUrl && (
+                <a href={slide.buttonUrl} className="btn btn-light btn-lg">{slide.buttonText}</a>
+              )}
+            </div>
+          </div>
+        </Carousel.Item>
+      ))}
+    </Carousel>
+  );
+};
 
 const SubPagesBlock: React.FC<{ config: any; pageDetail?: StorefrontPageDetail }> = ({ config, pageDetail }) => {
   const children = pageDetail?.childPages ?? [];
@@ -186,14 +226,14 @@ const SubPagesBlock: React.FC<{ config: any; pageDetail?: StorefrontPageDetail }
       <Row xs={1} sm={2} md={cols} className="g-4">
         {children.map(child => (
           <Col key={child.id}>
-            <a href={pageUrl(child.type, child.slug)} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <div style={{ border: '1px solid #dee2e6', borderRadius: 8, overflow: 'hidden', height: '100%' }}>
+            <a href={pageUrl(child.type, child.slug)} className="pbr-subpages-link">
+              <div className="pbr-subpages-card">
                 {child.imageUrl && (
-                  <img src={child.imageUrl} alt={child.name} style={{ width: '100%', height: 160, objectFit: 'cover' }} />
+                  <img src={child.imageUrl} alt={child.name} className="pbr-subpages-img" />
                 )}
-                <div style={{ padding: '1rem' }}>
-                  <div style={{ fontWeight: 600, marginBottom: 4 }}>{child.name}</div>
-                  {child.description && <p style={{ fontSize: '0.875rem', color: '#6c757d', margin: 0 }}>{child.description}</p>}
+                <div className="pbr-subpages-body">
+                  <div className="pbr-subpages-name">{child.name}</div>
+                  {child.description && <p className="pbr-subpages-desc">{child.description}</p>}
                 </div>
               </div>
             </a>
@@ -226,6 +266,8 @@ const ProductsBlock: React.FC<{ config: any; pageDetail?: StorefrontPageDetail }
               productId: item.productId,
               productName: item.name,
               productSlug: item.productSlug,
+              width: item.width,
+              composition: item.composition,
             }} />
           </Col>
         ))}
@@ -242,7 +284,7 @@ const FeaturedProductsBlock: React.FC<{ config: any }> = ({ config }) => {
   if (ids.length === 0 && !title) return null;
   return (
     <div style={buildStyle(config.style)}>
-      {title && <h3 style={{ marginBottom: '1rem' }}>{title}</h3>}
+      {title && <h3 className="pbr-featured-title">{title}</h3>}
       {ids.length === 0 && <p className="text-muted">No hay productos destacados configurados.</p>}
     </div>
   );
@@ -252,6 +294,8 @@ const FeaturedProductsBlock: React.FC<{ config: any }> = ({ config }) => {
 const RENDERERS: Record<string, React.FC<{ config: any; pageDetail?: StorefrontPageDetail }>> = {
   Header: ({ config }) => <HeaderBlock config={config} />,
   Paragraph: ({ config }) => <ParagraphBlock config={config} />,
+  HeaderParagraph: ({ config }) => <HeaderParagraphBlock config={config} />,
+  List: ({ config }) => <ListBlock config={config} />,
   Image: ({ config }) => <ImageBlock config={config} />,
   ImageText: ({ config }) => <ImageTextBlock config={config} />,
   Divider: ({ config }) => <DividerBlock config={config} />,

@@ -2,14 +2,18 @@ import React, { useState } from 'react';
 import { Navbar, Nav, Container, Badge, Form, InputGroup, Button, NavDropdown } from 'react-bootstrap';
 import { FaShoppingCart, FaUser, FaSearch, FaBars, FaHeart } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { useCart } from '../../contexts/CartContext';
-import { useFavorites } from '../../contexts/FavoritesContext';
-import { useSiteSettings } from '../../contexts/SiteSettingsContext';
-import NavMenu from './NavMenu';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../../contexts/AuthContext';
+import { useCart } from '../../../contexts/CartContext';
+import { useFavorites } from '../../../contexts/FavoritesContext';
+import { useSiteSettings } from '../../../contexts/SiteSettingsContext';
+import NavMenu from '../NavMenu';
 import './Header.css';
 
+const LANGS = ['es', 'ca', 'en'] as const;
+
 const Header: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const { isAuthenticated, name, logout } = useAuth();
   const { itemCount, openDrawer } = useCart();
   const { count: favCount } = useFavorites();
@@ -24,25 +28,47 @@ const Header: React.FC = () => {
     setSearch('');
   };
 
+  const changeLang = (lng: string) => i18n.changeLanguage(lng);
+
   return (
     <header className="storefront-header">
       {/* Top bar */}
       <div className="header-topbar">
         <Container>
           <div className="d-flex justify-content-between align-items-center">
-            <small className="text-muted">Envío gratis en pedidos &gt; €50</small>
-            <div className="d-flex gap-3">
+            <small className="text-muted">{t('header.freeShipping')}</small>
+            <div className="d-flex align-items-center gap-3">
+              {/* Language switcher */}
+              <div className="d-flex gap-1" style={{ fontSize: '0.72rem' }}>
+                {LANGS.map((lng, i) => (
+                  <React.Fragment key={lng}>
+                    {i > 0 && <span className="text-muted">·</span>}
+                    <button
+                      onClick={() => changeLang(lng)}
+                      style={{
+                        background: 'none', border: 'none', padding: '0 2px', cursor: 'pointer',
+                        fontWeight: i18n.language === lng ? 700 : 400,
+                        color: i18n.language === lng ? '#212529' : '#6c757d',
+                      }}
+                    >
+                      {t(`lang.${lng}`)}
+                    </button>
+                  </React.Fragment>
+                ))}
+              </div>
+
+              {/* User menu */}
               {isAuthenticated ? (
                 <NavDropdown title={<><FaUser size={13} className="me-1" />{name}</>} align="end" className="topbar-dropdown">
-                  <NavDropdown.Item as={Link} to="/account">Mi cuenta</NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/account/orders">Mis pedidos</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/account">{t('header.myAccount')}</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/account/orders">{t('header.myOrders')}</NavDropdown.Item>
                   <NavDropdown.Divider />
-                  <NavDropdown.Item onClick={() => { logout(); navigate('/'); }}>Cerrar sesión</NavDropdown.Item>
+                  <NavDropdown.Item onClick={() => { logout(); navigate('/'); }}>{t('header.logout')}</NavDropdown.Item>
                 </NavDropdown>
               ) : (
                 <>
-                  <Link to="/login" className="topbar-link">Iniciar sesión</Link>
-                  <Link to="/register" className="topbar-link">Registrarse</Link>
+                  <Link to="/login" className="topbar-link">{t('header.login')}</Link>
+                  <Link to="/register" className="topbar-link">{t('header.register')}</Link>
                 </>
               )}
             </div>
@@ -66,7 +92,7 @@ const Header: React.FC = () => {
             <Form className="header-search mx-auto" onSubmit={handleSearch}>
               <InputGroup>
                 <Form.Control
-                  placeholder="Buscar productos..."
+                  placeholder={t('header.search')}
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                 />

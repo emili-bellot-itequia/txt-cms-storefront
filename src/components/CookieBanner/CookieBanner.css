@@ -1,0 +1,94 @@
+/* ── Wrapper ──────────────────────────────────────────────────────────────────── */
+.cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1060;
+  background: #fff;
+  border-top: 1px solid #e9ecef;
+  box-shadow: 0 -4px 28px rgba(0, 0, 0, 0.1);
+  animation: cookie-slide-up 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes cookie-slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0);    }
+}
+
+/* ── Compact bar ──────────────────────────────────────────────────────────────── */
+.cookie-bar {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.9rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.cookie-bar-text {
+  flex: 1;
+  min-width: 220px;
+  margin: 0;
+  font-size: 0.85rem;
+  color: #495057;
+  line-height: 1.5;
+}
+
+.cookie-bar-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+/* ── Configure panel ──────────────────────────────────────────────────────────── */
+.cookie-config {
+  max-width: 660px;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 1rem;
+}
+
+.cookie-config-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+/* ── Cookie category row ──────────────────────────────────────────────────────── */
+.cookie-cat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 0;
+  gap: 1rem;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.cookie-cat:last-of-type { border-bottom: none; }
+
+.cookie-cat-info { display: flex; flex-direction: column; gap: 0.15rem; }
+.cookie-cat-name { font-size: 0.875rem; font-weight: 600; color: #212529; }
+.cookie-cat-desc { font-size: 0.78rem; color: #6c757d; }
+
+.cookie-cat-always {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--brand-color);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────────────── */
+.cookie-config-footer {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  padding-top: 0.75rem;
+  margin-top: 0.25rem;
+  border-top: 1px solid #e9ecef;
+}

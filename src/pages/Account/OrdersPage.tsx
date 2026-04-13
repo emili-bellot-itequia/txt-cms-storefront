@@ -2,29 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { Container, Table, Badge, Button, Spinner, Pagination } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaArrowLeft, FaEye } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { getOrders } from '../../services/profileService';
 import type { StorefrontOrder } from '../../types';
 
 const statusVariant: Record<string, string> = {
-  Pending: 'warning',
-  Confirmed: 'primary',
-  Processing: 'info',
-  Shipped: 'secondary',
-  Delivered: 'success',
+  PendingPayment: 'warning',
+  Paid: 'success',
+  Shipped: 'info',
   Cancelled: 'danger',
-};
-
-const statusLabel: Record<string, string> = {
-  Pending: 'Pendiente',
-  Confirmed: 'Confirmado',
-  Processing: 'En proceso',
-  Shipped: 'Enviado',
-  Delivered: 'Entregado',
-  Cancelled: 'Cancelado',
+  Returned: 'secondary',
 };
 
 const OrdersPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<StorefrontOrder[]>([]);
   const [totalPages, setTotalPages] = useState(0);
@@ -44,27 +36,27 @@ const OrdersPage: React.FC = () => {
       <Container className="py-4">
         <div className="d-flex align-items-center gap-3 mb-4">
           <Button variant="link" className="p-0 text-muted" onClick={() => navigate('/account')}>
-            <FaArrowLeft /> Volver a mi cuenta
+            <FaArrowLeft /> {t('orders.backToAccount')}
           </Button>
-          <h2 className="fw-bold mb-0">Mis pedidos</h2>
+          <h2 className="fw-bold mb-0">{t('orders.title')}</h2>
         </div>
 
         {loading ? (
           <div className="text-center py-5"><Spinner animation="border" variant="primary" /></div>
         ) : orders.length === 0 ? (
           <div className="text-center py-5 text-muted">
-            <p>Aún no tienes pedidos.</p>
-            <Button variant="primary" onClick={() => navigate('/catalog')}>Ver catálogo</Button>
+            <p>{t('orders.noOrders')}</p>
+            <Button variant="primary" onClick={() => navigate('/catalog')}>{t('orders.browseCatalog')}</Button>
           </div>
         ) : (
           <>
             <Table hover responsive>
               <thead className="table-light">
                 <tr>
-                  <th>#</th>
-                  <th>Fecha</th>
-                  <th>Estado</th>
-                  <th className="text-end">Total</th>
+                  <th>{t('orders.colId')}</th>
+                  <th>{t('orders.colDate')}</th>
+                  <th>{t('orders.colStatus')}</th>
+                  <th className="text-end">{t('orders.colTotal')}</th>
                   <th></th>
                 </tr>
               </thead>
@@ -75,7 +67,7 @@ const OrdersPage: React.FC = () => {
                     <td>{new Date(o.createdAt).toLocaleDateString('es-ES')}</td>
                     <td>
                       <Badge bg={statusVariant[o.status] ?? 'secondary'}>
-                        {statusLabel[o.status] ?? o.status}
+                        {t(`orders.statuses.${o.status}`, { defaultValue: o.status })}
                       </Badge>
                     </td>
                     <td className="text-end fw-bold">€{o.total.toFixed(2)}</td>

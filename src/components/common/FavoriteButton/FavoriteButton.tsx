@@ -1,8 +1,8 @@
 import React from 'react';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { useFavorites } from '../../contexts/FavoritesContext';
-import { useAuth } from '../../contexts/AuthContext';
+import { useFavorites } from '../../../contexts/FavoritesContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import './FavoriteButton.css';
 
 interface Props {

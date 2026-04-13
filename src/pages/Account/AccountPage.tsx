@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Badge, Modal } from 'react-bootstrap';
 import { FaPlus, FaEdit, FaTrash, FaMapMarkerAlt, FaUser } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { getProfile, updateProfile, addAddress, updateAddress, deleteAddress } from '../../services/profileService';
 import type { StorefrontProfile, CustomerAddress } from '../../types';
@@ -11,6 +12,7 @@ const emptyAddress: Partial<CustomerAddress> = {
 };
 
 const AccountPage: React.FC = () => {
+  const { t } = useTranslation();
   const [profile, setProfile] = useState<StorefrontProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -41,9 +43,9 @@ const AccountPage: React.FC = () => {
     setProfileMsg(null);
     try {
       await updateProfile({ name, phone: phone || undefined, taxId: taxId || undefined });
-      setProfileMsg({ type: 'success', text: 'Datos guardados correctamente.' });
+      setProfileMsg({ type: 'success', text: t('account.saved') });
     } catch {
-      setProfileMsg({ type: 'danger', text: 'Error al guardar.' });
+      setProfileMsg({ type: 'danger', text: t('account.saveError') });
     } finally {
       setSaving(false);
     }
@@ -65,14 +67,14 @@ const AccountPage: React.FC = () => {
       setProfile(p);
       setShowAddr(false);
     } catch (e: any) {
-      setAddrError(e?.response?.data?.message ?? 'Error al guardar dirección');
+      setAddrError(e?.response?.data?.message ?? t('account.addrSaveError'));
     } finally {
       setAddrSaving(false);
     }
   };
 
   const handleDeleteAddr = async (id: number) => {
-    if (!confirm('¿Eliminar esta dirección?')) return;
+    if (!confirm(t('account.deleteConfirm'))) return;
     try {
       await deleteAddress(id);
       setProfile(p => p ? { ...p, addresses: p.addresses.filter(a => a.id !== id) } : p);
@@ -85,42 +87,42 @@ const AccountPage: React.FC = () => {
   return (
     <MainLayout>
       <Container className="py-4">
-        <h2 className="fw-bold mb-4">Mi cuenta</h2>
+        <h2 className="fw-bold mb-4">{t('account.title')}</h2>
 
         <Row>
           {/* Profile */}
           <Col lg={5} className="mb-4">
             <Card>
               <Card.Body>
-                <h5 className="fw-semibold mb-3"><FaUser className="me-2" />Datos personales</h5>
+                <h5 className="fw-semibold mb-3"><FaUser className="me-2" />{t('account.personalData')}</h5>
                 {profileMsg && <Alert variant={profileMsg.type} className="py-2">{profileMsg.text}</Alert>}
                 <Form onSubmit={handleSaveProfile}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Nombre</Form.Label>
+                    <Form.Label>{t('account.name')}</Form.Label>
                     <Form.Control value={name} onChange={e => setName(e.target.value)} required />
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>Email</Form.Label>
+                    <Form.Label>{t('account.email')}</Form.Label>
                     <Form.Control value={profile.email} disabled />
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>Teléfono</Form.Label>
+                    <Form.Label>{t('account.phone')}</Form.Label>
                     <Form.Control value={phone} onChange={e => setPhone(e.target.value)} />
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>NIF / CIF</Form.Label>
+                    <Form.Label>{t('account.taxId')}</Form.Label>
                     <Form.Control value={taxId} onChange={e => setTaxId(e.target.value)} />
                   </Form.Group>
                   {profile.customerGroupName && (
-                    <p className="text-muted small mb-3">Grupo: <strong>{profile.customerGroupName}</strong></p>
+                    <p className="text-muted small mb-3">{t('account.group')} <strong>{profile.customerGroupName}</strong></p>
                   )}
                   <Button type="submit" variant="primary" disabled={saving}>
-                    {saving ? <Spinner size="sm" animation="border" /> : 'Guardar'}
+                    {saving ? <Spinner size="sm" animation="border" /> : t('account.save')}
                   </Button>
                 </Form>
 
                 <hr />
-                <Link to="/account/orders" className="btn btn-outline-secondary btn-sm w-100">Ver mis pedidos</Link>
+                <Link to="/account/orders" className="btn btn-outline-secondary btn-sm w-100">{t('account.viewOrders')}</Link>
               </Card.Body>
             </Card>
           </Col>
@@ -130,19 +132,19 @@ const AccountPage: React.FC = () => {
             <Card>
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h5 className="fw-semibold mb-0"><FaMapMarkerAlt className="me-2" />Mis direcciones</h5>
-                  <Button size="sm" variant="primary" onClick={openAddAddr}><FaPlus className="me-1" />Añadir</Button>
+                  <h5 className="fw-semibold mb-0"><FaMapMarkerAlt className="me-2" />{t('account.myAddresses')}</h5>
+                  <Button size="sm" variant="primary" onClick={openAddAddr}><FaPlus className="me-1" />{t('account.add')}</Button>
                 </div>
 
                 {profile.addresses.length === 0 ? (
-                  <p className="text-muted text-center py-3">No tienes direcciones guardadas.</p>
+                  <p className="text-muted text-center py-3">{t('account.noAddresses')}</p>
                 ) : (
                   profile.addresses.map(a => (
                     <div key={a.id} className="border rounded p-3 mb-2 d-flex justify-content-between align-items-start">
                       <div>
                         <div className="fw-semibold">
                           {a.alias}
-                          {a.isDefault && <Badge bg="primary" className="ms-2 fs-xs">Principal</Badge>}
+                          {a.isDefault && <Badge bg="primary" className="ms-2 fs-xs">{t('account.defaultBadge')}</Badge>}
                         </div>
                         <div className="text-muted small">{a.recipientName}</div>
                         <div className="text-muted small">{a.street}, {a.postalCode} {a.city}{a.province ? `, ${a.province}` : ''}</div>
@@ -164,38 +166,38 @@ const AccountPage: React.FC = () => {
       {/* Address Modal */}
       <Modal show={showAddr} onHide={() => setShowAddr(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>{editAddrId ? 'Editar dirección' : 'Nueva dirección'}</Modal.Title>
+          <Modal.Title>{editAddrId ? t('account.editAddress') : t('account.newAddress')}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {addrError && <Alert variant="danger" className="py-2">{addrError}</Alert>}
           <Row>
             <Col sm={6}>
               <Form.Group className="mb-2">
-                <Form.Label>Alias</Form.Label>
-                <Form.Control value={addrForm.alias ?? ''} onChange={e => setAddrForm(f => ({ ...f, alias: e.target.value }))} placeholder="Casa, Trabajo..." />
+                <Form.Label>{t('account.alias')}</Form.Label>
+                <Form.Control value={addrForm.alias ?? ''} onChange={e => setAddrForm(f => ({ ...f, alias: e.target.value }))} placeholder={t('account.aliasPlaceholder')} />
               </Form.Group>
             </Col>
             <Col sm={6}>
               <Form.Group className="mb-2">
-                <Form.Label>Destinatario</Form.Label>
+                <Form.Label>{t('account.recipient')}</Form.Label>
                 <Form.Control value={addrForm.recipientName ?? ''} onChange={e => setAddrForm(f => ({ ...f, recipientName: e.target.value }))} />
               </Form.Group>
             </Col>
           </Row>
           <Form.Group className="mb-2">
-            <Form.Label>Calle</Form.Label>
+            <Form.Label>{t('account.street')}</Form.Label>
             <Form.Control value={addrForm.street ?? ''} onChange={e => setAddrForm(f => ({ ...f, street: e.target.value }))} />
           </Form.Group>
           <Row>
             <Col sm={4}>
               <Form.Group className="mb-2">
-                <Form.Label>CP</Form.Label>
+                <Form.Label>{t('account.postalCode')}</Form.Label>
                 <Form.Control value={addrForm.postalCode ?? ''} onChange={e => setAddrForm(f => ({ ...f, postalCode: e.target.value }))} />
               </Form.Group>
             </Col>
             <Col sm={8}>
               <Form.Group className="mb-2">
-                <Form.Label>Ciudad</Form.Label>
+                <Form.Label>{t('account.city')}</Form.Label>
                 <Form.Control value={addrForm.city ?? ''} onChange={e => setAddrForm(f => ({ ...f, city: e.target.value }))} />
               </Form.Group>
             </Col>
@@ -203,33 +205,33 @@ const AccountPage: React.FC = () => {
           <Row>
             <Col sm={6}>
               <Form.Group className="mb-2">
-                <Form.Label>Provincia</Form.Label>
+                <Form.Label>{t('account.province')}</Form.Label>
                 <Form.Control value={addrForm.province ?? ''} onChange={e => setAddrForm(f => ({ ...f, province: e.target.value }))} />
               </Form.Group>
             </Col>
             <Col sm={6}>
               <Form.Group className="mb-2">
-                <Form.Label>País</Form.Label>
+                <Form.Label>{t('account.country')}</Form.Label>
                 <Form.Control value={addrForm.country ?? 'ES'} onChange={e => setAddrForm(f => ({ ...f, country: e.target.value }))} />
               </Form.Group>
             </Col>
           </Row>
           <Form.Group className="mb-2">
-            <Form.Label>Teléfono</Form.Label>
+            <Form.Label>{t('account.phone')}</Form.Label>
             <Form.Control value={addrForm.phone ?? ''} onChange={e => setAddrForm(f => ({ ...f, phone: e.target.value }))} />
           </Form.Group>
           <Form.Check
             type="checkbox"
-            label="Dirección principal"
+            label={t('account.defaultAddress')}
             checked={addrForm.isDefault ?? false}
             onChange={e => setAddrForm(f => ({ ...f, isDefault: e.target.checked }))}
             className="mt-2"
           />
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowAddr(false)}>Cancelar</Button>
+          <Button variant="secondary" onClick={() => setShowAddr(false)}>{t('account.cancel')}</Button>
           <Button variant="primary" onClick={handleSaveAddr} disabled={addrSaving}>
-            {addrSaving ? <Spinner size="sm" animation="border" /> : 'Guardar'}
+            {addrSaving ? <Spinner size="sm" animation="border" /> : t('account.save')}
           </Button>
         </Modal.Footer>
       </Modal>

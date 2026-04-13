@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Container, Spinner, Row, Col, Button, Badge, Carousel } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { getHomeBlocks, type StorefrontHomeBlock } from '../../services/homeService';
 import { useCart } from '../../contexts/CartContext';
@@ -89,6 +90,7 @@ const ImageGridBlock: React.FC<{ config: any }> = ({ config }) => {
 
 // ─── Featured Products ────────────────────────────────────────────────────────
 const FeaturedProductsBlock: React.FC<{ config: any }> = ({ config }) => {
+  const { t } = useTranslation();
   const { addItem, loading: cartLoading } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -130,10 +132,10 @@ const FeaturedProductsBlock: React.FC<{ config: any }> = ({ config }) => {
                     : <div className="home-featured-placeholder">📦</div>}
                   {(hasDiscount || hasGroupDiscount) && (
                     <Badge bg="danger" className="position-absolute top-0 start-0 m-2" style={{ fontSize: 10 }}>
-                      {hasGroupDiscount ? `−${item.discountPercent}%` : 'OFERTA'}
+                      {hasGroupDiscount ? `−${item.discountPercent}%` : t('product.offer')}
                     </Badge>
                   )}
-                  {outOfStock && <div className="home-featured-outofstock">Sin stock</div>}
+                  {outOfStock && <div className="home-featured-outofstock">{t('product.outOfStock')}</div>}
                 </Link>
                 <div className="p-2">
                   <div className="home-featured-name"><Link to={slug}>{item.name}</Link></div>
@@ -150,7 +152,7 @@ const FeaturedProductsBlock: React.FC<{ config: any }> = ({ config }) => {
                     onClick={e => handleAdd(e, item)}
                   >
                     <FaShoppingCart className="me-1" />
-                    {outOfStock ? 'Sin stock' : !item._isVariant && item.hasVariants ? 'Ver opciones' : 'Añadir'}
+                    {outOfStock ? t('product.outOfStock') : !item._isVariant && item.hasVariants ? t('product.viewOptions') : t('product.add')}
                   </Button>
                 </div>
               </div>
@@ -209,6 +211,7 @@ const BlockRenderer: React.FC<{ block: StorefrontHomeBlock }> = ({ block }) => {
 
 // ─── Landing Page ─────────────────────────────────────────────────────────────
 const LandingPage: React.FC = () => {
+  const { t } = useTranslation();
   const [blocks, setBlocks] = useState<StorefrontHomeBlock[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -227,8 +230,8 @@ const LandingPage: React.FC = () => {
     return (
       <MainLayout>
         <Container className="py-5 text-center text-muted">
-          <p>Próximamente...</p>
-          <Link to="/catalog" className="btn btn-primary">Ver catálogo</Link>
+          <p>{t('landing.comingSoon')}</p>
+          <Link to="/catalog" className="btn btn-primary">{t('landing.browseCatalog')}</Link>
         </Container>
       </MainLayout>
     );

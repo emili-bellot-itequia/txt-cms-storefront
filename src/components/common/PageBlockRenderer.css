@@ -1,0 +1,48 @@
+/* ── Image ────────────────────────────────────────────────────────────────────── */
+.pbr-image { margin: 0; }
+.pbr-image img { max-width: 100%; height: auto; display: block; }
+.pbr-image-caption { font-size: 0.85rem; color: #6c757d; margin-top: 4px; }
+
+/* ── ImageText ────────────────────────────────────────────────────────────────── */
+.pbr-image-text-img { max-width: 100%; height: auto; border-radius: 4px; }
+
+/* ── HeaderParagraph ─────────────────────────────────────────────────────────── */
+.pbr-header-paragraph-text { margin-top: 0.75rem; }
+
+/* ── List ─────────────────────────────────────────────────────────────────────── */
+.pbr-list { margin-top: 0; margin-bottom: 1rem; }
+
+/* ── Gallery ──────────────────────────────────────────────────────────────────── */
+.pbr-gallery-img { width: 100%; height: 160px; object-fit: cover; border-radius: 4px; }
+
+/* ── FormField ────────────────────────────────────────────────────────────────── */
+.pbr-form-label { display: block; font-weight: 500; margin-bottom: 4px; }
+.pbr-form-required { color: #dc3545; margin-left: 2px; }
+
+/* ── Banner ───────────────────────────────────────────────────────────────────── */
+.pbr-banner {
+  position: relative;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-position: center;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.pbr-banner-overlay { position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.4); }
+.pbr-banner-content { position: relative; text-align: center; color: #fff; padding: 2rem; }
+.pbr-banner-title { font-weight: 700; margin-bottom: 0.5rem; }
+.pbr-banner-subtitle { font-size: 1.1rem; margin-bottom: 1.5rem; opacity: 0.9; }
+
+/* ── SubPages ─────────────────────────────────────────────────────────────────── */
+.pbr-subpages-link { text-decoration: none; color: inherit; display: block; height: 100%; }
+.pbr-subpages-card { border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden; height: 100%; }
+.pbr-subpages-img { width: 100%; height: 160px; object-fit: cover; }
+.pbr-subpages-body { padding: 1rem; }
+.pbr-subpages-name { font-weight: 600; margin-bottom: 4px; }
+.pbr-subpages-desc { font-size: 0.875rem; color: #6c757d; margin: 0; }
+
+/* ── FeaturedProducts ─────────────────────────────────────────────────────────── */
+.pbr-featured-title { margin-bottom: 1rem; }

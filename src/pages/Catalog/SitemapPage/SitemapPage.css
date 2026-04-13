@@ -1,0 +1,99 @@
+/* ── Sitemap grid ─────────────────────────────────────────────────────────────── */
+.sitemap-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem 2rem;
+  margin-bottom: 3rem;
+}
+
+@media (max-width: 768px) {
+  .sitemap-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sitemap-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* ── Section title (category heading) ────────────────────────────────────────── */
+.sitemap-section-title {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--brand-color);
+  text-decoration: none;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.sitemap-section-title:hover {
+  text-decoration: underline;
+  color: var(--brand-color);
+}
+
+/* ── Links ────────────────────────────────────────────────────────────────────── */
+.sitemap-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sitemap-links li {
+  margin-bottom: 0.35rem;
+}
+
+.sitemap-link {
+  font-size: 0.875rem;
+  color: #333;
+  text-decoration: none;
+  line-height: 1.4;
+}
+
+.sitemap-link:hover {
+  color: var(--brand-color);
+  text-decoration: underline;
+}
+
+/* ── Nested links (sub-subcategories) ────────────────────────────────────────── */
+.sitemap-links--nested {
+  padding-left: 1rem;
+  margin-top: 0.35rem;
+  border-left: 2px solid #f0f0f0;
+}
+
+/* ── Standalone pages section ────────────────────────────────────────────────── */
+.sitemap-standalone {
+  border-top: 1px solid #e9ecef;
+  padding-top: 2rem;
+  margin-top: 1rem;
+}
+
+.sitemap-standalone-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--brand-color);
+  margin-bottom: 1rem;
+}
+
+.sitemap-links--inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 2rem;
+}
+
+/* ── External link icon ───────────────────────────────────────────────────────── */
+.sitemap-external-icon {
+  margin-left: 0.25rem;
+  font-size: 0.75em;
+  opacity: 0.65;
+}

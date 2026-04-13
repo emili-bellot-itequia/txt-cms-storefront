@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Button, Card, Alert, Form } from 'react-bootstrap';
 import { FaTrash, FaArrowRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 
 const CartPage: React.FC = () => {
+  const { t } = useTranslation();
   const { cart, loading, fetchCart, updateItem, removeItem } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -18,7 +20,7 @@ const CartPage: React.FC = () => {
     if (!cart?.expiresAt) { setTimeLeft(''); return; }
     const tick = () => {
       const diff = new Date(cart.expiresAt).getTime() - Date.now();
-      if (diff <= 0) { setTimeLeft('Expirado'); return; }
+      if (diff <= 0) { setTimeLeft(t('cart.expired')); return; }
       const m = Math.floor(diff / 60000);
       const s = Math.floor((diff % 60000) / 1000);
       setTimeLeft(`${m}:${s.toString().padStart(2, '0')}`);
@@ -31,8 +33,8 @@ const CartPage: React.FC = () => {
   if (!isAuthenticated) return (
     <MainLayout>
       <Container className="py-5 text-center">
-        <h4>Inicia sesión para ver tu carrito</h4>
-        <Button variant="primary" onClick={() => navigate('/login')}>Iniciar sesión</Button>
+        <h4>{t('cart.loginRequired')}</h4>
+        <Button variant="primary" onClick={() => navigate('/login')}>{t('header.login')}</Button>
       </Container>
     </MainLayout>
   );
@@ -42,20 +44,20 @@ const CartPage: React.FC = () => {
   return (
     <MainLayout>
       <Container className="py-4">
-        <h2 className="fw-bold mb-4">Mi carrito</h2>
+        <h2 className="fw-bold mb-4">{t('cart.title')}</h2>
 
         {isEmpty ? (
           <div className="text-center py-5">
-            <p className="text-muted mb-3">Tu carrito está vacío</p>
-            <Button variant="primary" onClick={() => navigate('/catalog')}>Ver catálogo</Button>
+            <p className="text-muted mb-3">{t('cart.empty')}</p>
+            <Button variant="primary" onClick={() => navigate('/catalog')}>{t('cart.browseCatalog')}</Button>
           </div>
         ) : (
           <Row>
             <Col lg={8}>
               {timeLeft && (
-                <Alert variant={timeLeft === 'Expirado' ? 'danger' : 'warning'} className="d-flex align-items-center gap-2">
-                  🕐 Reserva expira en: <strong>{timeLeft}</strong>
-                  {timeLeft === 'Expirado' && <Button size="sm" variant="outline-danger" onClick={fetchCart} className="ms-auto">Actualizar</Button>}
+                <Alert variant={timeLeft === t('cart.expired') ? 'danger' : 'warning'} className="d-flex align-items-center gap-2">
+                  🕐 {t('cart.reserveExpires')} <strong>{timeLeft}</strong>
+                  {timeLeft === t('cart.expired') && <Button size="sm" variant="outline-danger" onClick={fetchCart} className="ms-auto">{t('cart.refresh')}</Button>}
                 </Alert>
               )}
 
@@ -111,7 +113,7 @@ const CartPage: React.FC = () => {
             <Col lg={4}>
               <Card className="sticky-top" style={{ top: 90 }}>
                 <Card.Body>
-                  <h5 className="fw-bold mb-3">Resumen</h5>
+                  <h5 className="fw-bold mb-3">{t('cart.summary')}</h5>
                   {cart!.items.map(item => (
                     <div key={item.id} className="d-flex justify-content-between small mb-1">
                       <span className="text-muted">{item.productName} x{item.quantity}m</span>
@@ -120,17 +122,17 @@ const CartPage: React.FC = () => {
                   ))}
                   {(cart!.discountPercent ?? 0) > 0 && (
                     <div className="d-flex justify-content-between small text-success mb-1">
-                      <span>Descuento ({cart!.discountPercent}%)</span>
+                      <span>{t('cart.discount', { percent: cart!.discountPercent })}</span>
                       <span>−€{(cart!.items.reduce((s, i) => s + (i.originalUnitPrice - i.unitPrice) * i.quantity, 0)).toFixed(2)}</span>
                     </div>
                   )}
                   <hr />
                   <div className="d-flex justify-content-between fw-bold fs-5 mb-3">
-                    <span>Total</span>
+                    <span>{t('cart.total')}</span>
                     <span>€{(cart!.total ?? 0).toFixed(2)}</span>
                   </div>
                   <Button variant="primary" size="lg" className="w-100" onClick={() => navigate('/checkout')}>
-                    Finalizar compra <FaArrowRight className="ms-1" />
+                    {t('cart.checkout')} <FaArrowRight className="ms-1" />
                   </Button>
                 </Card.Body>
               </Card>

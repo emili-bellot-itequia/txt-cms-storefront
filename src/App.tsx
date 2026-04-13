@@ -10,11 +10,12 @@ import ProtectedRoute from './components/Auth/ProtectedRoute';
 import LandingPage from './pages/Home/LandingPage';
 import HomePage from './pages/Catalog/HomePage';
 import ProductDetailPage from './pages/Catalog/ProductDetailPage';
-import VariantDetailPage from './pages/Catalog/VariantDetailPage';
-import PageCatalogPage from './pages/Catalog/PageCatalogPage';
+import VariantDetailPage from './pages/Catalog/VariantDetailPage/VariantDetailPage';
+import PageCatalogPage from './pages/Catalog/PageCatalogPage/PageCatalogPage';
 import CartPage from './pages/Cart/CartPage';
 import CheckoutPage from './pages/Checkout/CheckoutPage';
 import CheckoutSuccessPage from './pages/Checkout/CheckoutSuccessPage';
+import CheckoutErrorPage from './pages/Checkout/CheckoutErrorPage';
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
 import AccountPage from './pages/Account/AccountPage';
@@ -47,6 +48,7 @@ function App() {
               <Route element={<ProtectedRoute />}>
                 <Route path="/checkout" element={<CheckoutPage />} />
                 <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
+                <Route path="/checkout/error" element={<CheckoutErrorPage />} />
                 <Route path="/account" element={<AccountPage />} />
                 <Route path="/account/orders" element={<OrdersPage />} />
                 <Route path="/account/orders/:id" element={<OrderDetailPage />} />

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Container, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { login as loginService } from '../../services/authService';
 import { useAuth } from '../../contexts/AuthContext';
 
 const LoginPage: React.FC = () => {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -25,7 +27,7 @@ const LoginPage: React.FC = () => {
       login(data);
       navigate(from, { replace: true });
     } catch (e: any) {
-      setError(e?.response?.data?.message ?? 'Credenciales incorrectas');
+      setError(e?.response?.data?.message ?? t('auth.login.error'));
     } finally {
       setLoading(false);
     }
@@ -36,43 +38,43 @@ const LoginPage: React.FC = () => {
       <Container className="py-5 d-flex justify-content-center">
         <Card style={{ width: '100%', maxWidth: 420 }}>
           <Card.Body className="p-4">
-            <h4 className="fw-bold mb-4 text-center">Iniciar sesión</h4>
+            <h4 className="fw-bold mb-4 text-center">{t('auth.login.title')}</h4>
 
             {error && <Alert variant="danger" className="py-2">{error}</Alert>}
 
             <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-3">
-                <Form.Label>Email</Form.Label>
+                <Form.Label>{t('auth.login.email')}</Form.Label>
                 <Form.Control
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="tu@email.com"
+                  placeholder={t('auth.login.emailPlaceholder')}
                   required
                   autoFocus
                 />
               </Form.Group>
 
               <Form.Group className="mb-4">
-                <Form.Label>Contraseña</Form.Label>
+                <Form.Label>{t('auth.login.password')}</Form.Label>
                 <Form.Control
                   type="password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder={t('auth.login.passwordPlaceholder')}
                   required
                 />
               </Form.Group>
 
               <Button type="submit" variant="primary" className="w-100" disabled={loading}>
-                {loading ? <><Spinner size="sm" animation="border" className="me-2" />Entrando...</> : 'Entrar'}
+                {loading ? <><Spinner size="sm" animation="border" className="me-2" />{t('auth.login.loading')}</> : t('auth.login.submit')}
               </Button>
             </Form>
 
             <hr />
             <p className="text-center text-muted small mb-0">
-              ¿No tienes cuenta?{' '}
-              <Link to="/register">Regístrate aquí</Link>
+              {t('auth.login.noAccount')}{' '}
+              <Link to="/register">{t('auth.login.registerLink')}</Link>
             </p>
           </Card.Body>
         </Card>

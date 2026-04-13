@@ -3,8 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Spinner, Alert, Badge } from 'react-bootstrap';
 import { FaArrowLeft } from 'react-icons/fa';
 import MainLayout from '../../components/Layout/MainLayout';
-import VariantCard from '../../components/Product/VariantCard';
+import VariantCard from '../../components/Product/VariantCard/VariantCard';
 import { getProductBySlug } from '../../services/productService';
+import { formatComposition } from '../../utils/composition';
 import type { StorefrontProduct, StorefrontVariant } from '../../types';
 
 const ProductDetailPage: React.FC = () => {
@@ -63,6 +64,24 @@ const ProductDetailPage: React.FC = () => {
           </div>
           {product.description && (
             <p className="text-muted" style={{ maxWidth: 700, whiteSpace: 'pre-line' }}>{product.description}</p>
+          )}
+          {(product.width && product.width > 0 || product.composition) && (
+            <table className="table table-sm" style={{ maxWidth: 400, fontSize: '0.875rem' }}>
+              <tbody>
+                {product.width && product.width > 0 && (
+                  <tr>
+                    <td className="text-muted fw-semibold" style={{ width: 140 }}>Ancho</td>
+                    <td>{product.width} cm</td>
+                  </tr>
+                )}
+                {formatComposition(product.composition) && (
+                  <tr>
+                    <td className="text-muted fw-semibold align-top">Composición</td>
+                    <td>{formatComposition(product.composition)}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           )}
         </div>
 

@@ -1,81 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert, Spinner, Badge } from 'react-bootstrap';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { checkout } from '../../services/cartService';
 import { getProfile } from '../../services/profileService';
 import { getApplicableShippingRate, type ApplicableShippingRate } from '../../services/shippingService';
-import type { CustomerAddress } from '../../types';
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
-
-const PaymentForm: React.FC<{
-  clientSecret: string;
-  amount: number;
-  shippingCost: number;
-  currency: string;
-  onSuccess: () => void;
-}> = ({ amount, shippingCost, onSuccess }) => {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [processing, setProcessing] = useState(false);
-  const [error, setError] = useState('');
-
-  const subtotal = amount - shippingCost;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!stripe || !elements) return;
-    setProcessing(true);
-    setError('');
-
-    const { error: stripeError } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/checkout/success`,
-      },
-    });
-
-    if (stripeError) {
-      setError(stripeError.message ?? 'Error procesando el pago');
-      setProcessing(false);
-    } else {
-      onSuccess();
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <div className="mb-3 p-3 bg-light rounded small">
-        <div className="d-flex justify-content-between mb-1">
-          <span className="text-muted">Subtotal productos</span>
-          <span>€{subtotal.toFixed(2)}</span>
-        </div>
-        <div className="d-flex justify-content-between mb-1">
-          <span className="text-muted">Gastos de envío</span>
-          <span>{shippingCost === 0 ? <span className="text-success">Gratis</span> : `€${shippingCost.toFixed(2)}`}</span>
-        </div>
-        <div className="d-flex justify-content-between fw-bold border-top pt-1 mt-1">
-          <span>Total</span>
-          <span>€{amount.toFixed(2)}</span>
-        </div>
-      </div>
-      <PaymentElement className="mb-3" />
-      {error && <Alert variant="danger" className="py-2">{error}</Alert>}
-      <Button type="submit" variant="primary" size="lg" className="w-100" disabled={!stripe || processing}>
-        {processing
-          ? <><Spinner size="sm" animation="border" className="me-2" />Procesando...</>
-          : `Pagar €${amount.toFixed(2)}`}
-      </Button>
-    </form>
-  );
-};
+import type { CustomerAddress, CheckoutResponse } from '../../types';
 
 const CheckoutPage: React.FC = () => {
+  const { t } = useTranslation();
   const { cart, fetchCart } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -84,15 +20,14 @@ const CheckoutPage: React.FC = () => {
   const [shippingId, setShippingId] = useState<number | undefined>();
   const [billingId, setBillingId] = useState<number | undefined>();
   const [notes, setNotes] = useState('');
-  const [clientSecret, setClientSecret] = useState('');
-  const [amount, setAmount] = useState(0);
-  const [confirmedShippingCost, setConfirmedShippingCost] = useState(0);
-  const [currency, setCurrency] = useState('eur');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [step, setStep] = useState<'details' | 'payment'>('details');
   const [shippingRate, setShippingRate] = useState<ApplicableShippingRate | null | undefined>(undefined);
   const [shippingLoading, setShippingLoading] = useState(false);
+
+  // Redsys redirect state
+  const [redsysData, setRedsysData] = useState<CheckoutResponse | null>(null);
+  const redsysFormRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (!isAuthenticated) { navigate('/login'); return; }
@@ -120,6 +55,13 @@ const CheckoutPage: React.FC = () => {
     }).finally(() => setShippingLoading(false));
   }, [shippingId, addresses, cart]);
 
+  // Auto-submit the Redsys form once we have the data
+  useEffect(() => {
+    if (redsysData && redsysFormRef.current) {
+      redsysFormRef.current.submit();
+    }
+  }, [redsysData]);
+
   const cartSubtotal = cart?.items.reduce((sum, i) => sum + i.subtotal, 0) ?? 0;
   const estimatedShipping = shippingRate?.shippingCost ?? 0;
   const estimatedTotal = cartSubtotal + estimatedShipping;
@@ -129,15 +71,10 @@ const CheckoutPage: React.FC = () => {
     setError('');
     try {
       const res = await checkout({ shippingAddressId: shippingId, billingAddressId: billingId, notes: notes || undefined });
-      setClientSecret(res.clientSecret);
-      setAmount(res.amount);
-      setConfirmedShippingCost(res.shippingCost ?? 0);
-      setCurrency(res.currency);
-      setStep('payment');
+      setRedsysData(res);
     } catch (e: unknown) {
       const err = e as { response?: { data?: { message?: string } } };
-      setError(err?.response?.data?.message ?? 'Error al iniciar el pago');
-    } finally {
+      setError(err?.response?.data?.message ?? t('checkout.initError'));
       setLoading(false);
     }
   };
@@ -146,8 +83,8 @@ const CheckoutPage: React.FC = () => {
   if (!cart?.items?.length) return (
     <MainLayout>
       <Container className="py-5 text-center">
-        <p className="text-muted">Tu carrito está vacío.</p>
-        <Button variant="primary" onClick={() => navigate('/catalog')}>Ver catálogo</Button>
+        <p className="text-muted">{t('checkout.cartEmpty')}</p>
+        <Button variant="primary" onClick={() => navigate('/catalog')}>{t('cart.browseCatalog')}</Button>
       </Container>
     </MainLayout>
   );
@@ -155,81 +92,86 @@ const CheckoutPage: React.FC = () => {
   return (
     <MainLayout>
       <Container className="py-4" style={{ maxWidth: 860 }}>
-        <h2 className="fw-bold mb-4">Finalizar compra</h2>
+        <h2 className="fw-bold mb-4">{t('checkout.title')}</h2>
+
+        {/* Hidden Redsys form — auto-submitted once redsysData is set */}
+        {redsysData && (
+          <form ref={redsysFormRef} method="POST" action={redsysData.redsysUrl} style={{ display: 'none' }}>
+            <input type="hidden" name="Ds_SignatureVersion" value={redsysData.signatureVersion} />
+            <input type="hidden" name="Ds_MerchantParameters" value={redsysData.merchantParameters} />
+            <input type="hidden" name="Ds_Signature" value={redsysData.signature} />
+          </form>
+        )}
 
         <Row>
-          {/* Left: details or payment */}
+          {/* Left: address & notes form */}
           <Col lg={7} className="mb-4">
-            {step === 'details' ? (
-              <Card>
-                <Card.Body>
-                  <h5 className="fw-bold mb-3">Envío y facturación</h5>
+            <Card>
+              <Card.Body>
+                <h5 className="fw-bold mb-3">{t('checkout.shippingBilling')}</h5>
 
-                  {addresses.length === 0 ? (
-                    <Alert variant="info">
-                      No tienes direcciones guardadas.{' '}
-                      <Button variant="link" className="p-0" onClick={() => navigate('/account')}>Añadir dirección</Button>
-                    </Alert>
-                  ) : (
-                    <>
-                      <Form.Group className="mb-3">
-                        <Form.Label className="fw-semibold">Dirección de envío</Form.Label>
-                        <Form.Select value={shippingId ?? ''} onChange={e => setShippingId(Number(e.target.value))}>
-                          <option value="">-- Seleccionar --</option>
-                          {addresses.map(a => (
-                            <option key={a.id} value={a.id}>{a.alias} — {a.street}, {a.city}</option>
-                          ))}
-                        </Form.Select>
-                      </Form.Group>
+                {addresses.length === 0 ? (
+                  <Alert variant="info">
+                    {t('checkout.noAddresses')}{' '}
+                    <Button variant="link" className="p-0" onClick={() => navigate('/account')}>{t('checkout.addAddress')}</Button>
+                  </Alert>
+                ) : (
+                  <>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="fw-semibold">{t('checkout.shippingAddress')}</Form.Label>
+                      <Form.Select value={shippingId ?? ''} onChange={e => setShippingId(Number(e.target.value))}>
+                        <option value="">{t('checkout.selectAddress')}</option>
+                        {addresses.map(a => (
+                          <option key={a.id} value={a.id}>{a.alias} — {a.street}, {a.city}</option>
+                        ))}
+                      </Form.Select>
+                    </Form.Group>
 
-                      <Form.Group className="mb-3">
-                        <Form.Label className="fw-semibold">Dirección de facturación</Form.Label>
-                        <Form.Select value={billingId ?? ''} onChange={e => setBillingId(Number(e.target.value))}>
-                          <option value="">-- Igual que envío --</option>
-                          {addresses.map(a => (
-                            <option key={a.id} value={a.id}>{a.alias} — {a.street}, {a.city}</option>
-                          ))}
-                        </Form.Select>
-                      </Form.Group>
-                    </>
-                  )}
+                    <Form.Group className="mb-3">
+                      <Form.Label className="fw-semibold">{t('checkout.billingAddress')}</Form.Label>
+                      <Form.Select value={billingId ?? ''} onChange={e => setBillingId(Number(e.target.value))}>
+                        <option value="">{t('checkout.sameBilling')}</option>
+                        {addresses.map(a => (
+                          <option key={a.id} value={a.id}>{a.alias} — {a.street}, {a.city}</option>
+                        ))}
+                      </Form.Select>
+                    </Form.Group>
+                  </>
+                )}
 
-                  <Form.Group className="mb-3">
-                    <Form.Label className="fw-semibold">Notas del pedido</Form.Label>
-                    <Form.Control as="textarea" rows={2} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Instrucciones especiales..." />
-                  </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold">{t('checkout.orderNotes')}</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={2}
+                    value={notes}
+                    onChange={e => setNotes(e.target.value)}
+                    placeholder={t('checkout.notesPlaceholder')}
+                  />
+                </Form.Group>
 
-                  {error && <Alert variant="danger" className="py-2">{error}</Alert>}
+                {error && <Alert variant="danger" className="py-2">{error}</Alert>}
 
-                  <Button variant="primary" size="lg" className="w-100" onClick={handleProceedToPayment} disabled={loading || !shippingId}>
-                    {loading ? <><Spinner size="sm" animation="border" className="me-2" />Cargando...</> : 'Ir al pago'}
-                  </Button>
-                </Card.Body>
-              </Card>
-            ) : (
-              <Card>
-                <Card.Body>
-                  <h5 className="fw-bold mb-3">Pago seguro</h5>
-                  <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
-                    <PaymentForm
-                      clientSecret={clientSecret}
-                      amount={amount}
-                      shippingCost={confirmedShippingCost}
-                      currency={currency}
-                      onSuccess={() => navigate('/checkout/success')}
-                    />
-                  </Elements>
-                  <Button variant="link" className="mt-2 p-0 text-muted" onClick={() => setStep('details')}>← Volver a los detalles</Button>
-                </Card.Body>
-              </Card>
-            )}
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="w-100"
+                  onClick={handleProceedToPayment}
+                  disabled={loading || !shippingId}
+                >
+                  {loading
+                    ? <><Spinner size="sm" animation="border" className="me-2" />{t('checkout.processing')}</>
+                    : t('checkout.proceed')}
+                </Button>
+              </Card.Body>
+            </Card>
           </Col>
 
           {/* Right: order summary */}
           <Col lg={5}>
             <Card className="sticky-top" style={{ top: 90 }}>
               <Card.Body>
-                <h5 className="fw-bold mb-3">Resumen del pedido</h5>
+                <h5 className="fw-bold mb-3">{t('checkout.orderSummary')}</h5>
                 {cart.items.map(item => (
                   <div key={item.id} className="d-flex justify-content-between small mb-1">
                     <span className="text-muted">{item.productName} x{item.quantity}m</span>
@@ -238,67 +180,44 @@ const CheckoutPage: React.FC = () => {
                 ))}
                 <hr className="my-2" />
 
-                {step === 'payment' ? (
-                  // Use backend-confirmed amounts (discount already applied)
-                  <>
-                    <div className="d-flex justify-content-between small mb-1">
-                      <span className="text-muted">Subtotal</span>
-                      <span>€{(amount - confirmedShippingCost).toFixed(2)}</span>
-                    </div>
-                    <div className="d-flex justify-content-between small mb-2">
-                      <span className="text-muted">Gastos de envío</span>
-                      <span>{confirmedShippingCost === 0
-                        ? <span className="text-success fw-semibold">Gratis</span>
-                        : `€${confirmedShippingCost.toFixed(2)}`}
-                      </span>
-                    </div>
-                    <hr className="my-2" />
-                    <div className="d-flex justify-content-between fw-bold fs-5">
-                      <span>Total</span>
-                      <span>€{amount.toFixed(2)}</span>
-                    </div>
-                  </>
-                ) : (
-                  // Estimate before confirming
-                  <>
-                    <div className="d-flex justify-content-between small mb-1">
-                      <span className="text-muted">Subtotal</span>
-                      <span>€{cartSubtotal.toFixed(2)}</span>
-                    </div>
-                    <div className="d-flex justify-content-between small mb-2">
-                      <span className="text-muted">Gastos de envío</span>
-                      <span>
-                        {shippingLoading ? (
-                          <Spinner size="sm" animation="border" />
-                        ) : shippingRate == null ? (
-                          shippingId && shippingRate === null
-                            ? <Badge bg="warning" text="dark">No disponible</Badge>
-                            : <span className="text-muted">—</span>
-                        ) : shippingRate.isFree ? (
-                          <span className="text-success fw-semibold">Gratis</span>
-                        ) : (
-                          `€${shippingRate.shippingCost.toFixed(2)}`
-                        )}
-                      </span>
-                    </div>
-                    {shippingRate && shippingRate.freeShippingThreshold && !shippingRate.isFree && (
-                      <div className="small text-muted mb-2">
-                        Envío gratis a partir de <strong>€{shippingRate.freeShippingThreshold.toFixed(2)}</strong>
-                        {' '}(te faltan €{(shippingRate.freeShippingThreshold - cartSubtotal).toFixed(2)})
-                      </div>
+                <div className="d-flex justify-content-between small mb-1">
+                  <span className="text-muted">{t('checkout.subtotal')}</span>
+                  <span>€{cartSubtotal.toFixed(2)}</span>
+                </div>
+                <div className="d-flex justify-content-between small mb-2">
+                  <span className="text-muted">{t('checkout.shipping')}</span>
+                  <span>
+                    {shippingLoading ? (
+                      <Spinner size="sm" animation="border" />
+                    ) : shippingRate == null ? (
+                      shippingId && shippingRate === null
+                        ? <Badge bg="warning" text="dark">{t('checkout.notAvailable')}</Badge>
+                        : <span className="text-muted">—</span>
+                    ) : shippingRate.isFree ? (
+                      <span className="text-success fw-semibold">{t('checkout.free')}</span>
+                    ) : (
+                      `€${shippingRate.shippingCost.toFixed(2)}`
                     )}
-                    {shippingRate === null && shippingId && (
-                      <Alert variant="warning" className="py-2 small">
-                        No hay tarifa de envío disponible para este país. Contacta con nosotros.
-                      </Alert>
-                    )}
-                    <hr className="my-2" />
-                    <div className="d-flex justify-content-between fw-bold fs-5">
-                      <span>Total</span>
-                      <span>€{estimatedTotal.toFixed(2)}</span>
-                    </div>
-                  </>
+                  </span>
+                </div>
+
+                {shippingRate && shippingRate.freeShippingThreshold && !shippingRate.isFree && (
+                  <div className="small text-muted mb-2">
+                    {t('checkout.freeShippingFrom', { threshold: shippingRate.freeShippingThreshold.toFixed(2) })}{' '}
+                    {t('checkout.missingForFree', { missing: (shippingRate.freeShippingThreshold - cartSubtotal).toFixed(2) })}
+                  </div>
                 )}
+                {shippingRate === null && shippingId && (
+                  <Alert variant="warning" className="py-2 small">
+                    {t('checkout.noShippingRate')}
+                  </Alert>
+                )}
+
+                <hr className="my-2" />
+                <div className="d-flex justify-content-between fw-bold fs-5">
+                  <span>{t('checkout.total')}</span>
+                  <span>€{estimatedTotal.toFixed(2)}</span>
+                </div>
 
                 {shippingRate && (
                   <div className="small text-muted mt-1">{shippingRate.name}</div>

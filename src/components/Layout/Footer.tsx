@@ -5,6 +5,7 @@ import {
   FaInstagram, FaFacebook, FaTiktok, FaPinterest,
   FaTwitter, FaYoutube, FaLinkedin,
 } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import { useSiteSettings, type SiteSettings } from '../../contexts/SiteSettingsContext';
 import { usePaymentMethods } from '../../contexts/PaymentMethodsContext';
 import { usePartners } from '../../contexts/PartnersContext';
@@ -21,13 +22,14 @@ const SOCIAL: { field: keyof SiteSettings; Icon: React.ElementType; label: strin
 ];
 
 const LEGAL_LINKS = [
-  { text: 'Aviso Legal', slug: 'aviso-legal' },
-  { text: 'Términos y condiciones', slug: 'terminos-condiciones' },
-  { text: 'Protección de datos', slug: 'proteccion-de-datos' },
-  { text: 'Política de cookies', slug: 'politica-de-cookies' },
+  { tKey: 'footer.legalNotice', slug: 'aviso-legal' },
+  { tKey: 'footer.terms', slug: 'terminos-condiciones' },
+  { tKey: 'footer.privacy', slug: 'proteccion-de-datos' },
+  { tKey: 'footer.cookies', slug: 'politica-de-cookies' },
 ];
 
 function FooterColContent({ col }: { col: FooterColumn }) {
+  const { t } = useTranslation();
   const paymentMethods = usePaymentMethods();
   const partners = usePartners();
 
@@ -50,7 +52,7 @@ function FooterColContent({ col }: { col: FooterColumn }) {
           )
         )}
         {partners.length === 0 && (
-          <span className="text-muted small">Sin partners configurados</span>
+          <span className="text-muted small">{t('footer.noPartners')}</span>
         )}
       </div>
     );
@@ -67,7 +69,7 @@ function FooterColContent({ col }: { col: FooterColumn }) {
           </span>
         ))}
         {paymentMethods.length === 0 && (
-          <span className="text-muted small">Sin métodos configurados</span>
+          <span className="text-muted small">{t('footer.noPaymentMethods')}</span>
         )}
       </div>
     );
@@ -125,6 +127,7 @@ function FooterColContent({ col }: { col: FooterColumn }) {
 }
 
 const Footer: React.FC = () => {
+  const { t } = useTranslation();
   const settings = useSiteSettings();
   const activeSocials = SOCIAL.filter(s => settings[s.field]);
   const visibleColumns = settings.footerColumns.filter(c => c.isVisible !== false);
@@ -156,7 +159,7 @@ const Footer: React.FC = () => {
             <div className="footer-legal">
               {LEGAL_LINKS.map((l, i) => (
                 <React.Fragment key={l.slug}>
-                  <Link to={`/${l.slug}`} className="footer-legal-link">{l.text}</Link>
+                  <Link to={`/${l.slug}`} className="footer-legal-link">{t(l.tKey)}</Link>
                   {i < LEGAL_LINKS.length - 1 && <span className="footer-legal-sep">·</span>}
                 </React.Fragment>
               ))}

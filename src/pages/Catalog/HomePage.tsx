@@ -3,7 +3,7 @@ import { Container, Row, Col, Form, InputGroup, Button, Spinner, Pagination } fr
 import { FaSearch } from 'react-icons/fa';
 import { useSearchParams } from 'react-router-dom';
 import MainLayout from '../../components/Layout/MainLayout';
-import VariantCard from '../../components/Product/VariantCard';
+import VariantCard from '../../components/Product/VariantCard/VariantCard';
 import { getVariantsPaged } from '../../services/productService';
 import type { StorefrontVariant } from '../../types';
 import useDebounce from '../../hooks/useDebounce';

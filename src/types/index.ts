@@ -13,6 +13,8 @@ export interface StorefrontProduct {
   productTypeName?: string;
   hasVariants: boolean;
   variants?: StorefrontVariant[];
+  width?: number;
+  composition?: string;
 }
 
 export interface StorefrontVariant {
@@ -30,6 +32,8 @@ export interface StorefrontVariant {
   productName: string;
   productSlug: string;
   productTypeName?: string;
+  width?: number;
+  composition?: string;
 }
 
 export interface StorefrontVariantDetail {
@@ -41,14 +45,21 @@ export interface StorefrontVariantDetail {
   originalPrice: number;
   discountPercent: number;
   availableStock: number;
-  typeValue?: string;
+  typeValue: string;
   thumbnailUrl?: string;
   imageUrls: string[];
   productId: number;
   productName: string;
   productSlug: string;
-  width?: number;
-  composition?: string;
+  width: number;
+  weight: number;
+  composition: string;
+  fall?: string;
+  texture?: string;
+  fabricType?: string;
+  careLabels?: number;
+  productTypeName: string;
+  siblings: StorefrontVariant[];
 }
 
 export interface CartItem {
@@ -80,10 +91,12 @@ export interface CheckoutRequest {
 }
 
 export interface CheckoutResponse {
-  clientSecret: string;
+  merchantParameters: string;
+  signature: string;
+  signatureVersion: string;
+  redsysUrl: string;
   amount: number;
   shippingCost: number;
-  currency: string;
 }
 
 export interface CustomerAddress {
@@ -129,6 +142,7 @@ export interface StorefrontOrderDetail {
   id: number;
   status: string;
   total: number;
+  shippingCost: number;
   createdAt: string;
   notes?: string;
   shippingAddress?: AddressSummary;
@@ -151,6 +165,7 @@ export interface OrderLine {
   discountPercent: number;
   quantity: number;
   subtotal: number;
+  thumbnailUrl?: string;
 }
 
 export interface StorefrontMenuItem {
@@ -177,6 +192,15 @@ export interface StorefrontPageItem {
   thumbnailUrl?: string;
   typeValue?: string;
   order: number;
+  width?: number;
+  composition?: string;
+}
+
+export interface PageFilterFacets {
+  minPrice: number;
+  maxPrice: number;
+  widths: number[];
+  materials: string[];
 }
 
 export interface BlockStyle {
@@ -222,6 +246,7 @@ export interface StorefrontPageDetail {
   currentPage: number;
   blocks: StorefrontPageBlock[];
   childPages: StorefrontChildPage[];
+  facets?: PageFilterFacets;
 }
 
 export interface PaginatedResponse<T> {
