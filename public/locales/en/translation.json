@@ -130,7 +130,8 @@
     "country": "Country",
     "defaultAddress": "Default address",
     "cancel": "Cancel",
-    "addrSaveError": "Error saving address"
+    "addrSaveError": "Error saving address",
+    "selectCountry": "Select a country"
   },
   "orders": {
     "backToAccount": "Back to my account",

@@ -88,6 +88,14 @@ export interface CheckoutRequest {
   shippingAddressId?: number;
   billingAddressId?: number;
   notes?: string;
+  browserAcceptHeader?: string;
+  browserUserAgent?: string;
+  browserJavaEnabled?: boolean;
+  browserLanguage?: string;
+  browserColorDepth?: string;
+  browserScreenHeight?: string;
+  browserScreenWidth?: string;
+  browserTZ?: string;
 }
 
 export interface CheckoutResponse {

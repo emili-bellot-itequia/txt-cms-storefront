@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { getProfile, updateProfile, addAddress, updateAddress, deleteAddress } from '../../services/profileService';
+import { getVisibleCountries, type VisibleCountry } from '../../services/countryService';
 import type { StorefrontProfile, CustomerAddress } from '../../types';
 
 const emptyAddress: Partial<CustomerAddress> = {
@@ -29,10 +30,14 @@ const AccountPage: React.FC = () => {
   const [editAddrId, setEditAddrId] = useState<number | null>(null);
   const [addrSaving, setAddrSaving] = useState(false);
   const [addrError, setAddrError] = useState('');
+  const [countries, setCountries] = useState<VisibleCountry[]>([]);
 
   useEffect(() => {
-    getProfile()
-      .then(p => { setProfile(p); setName(p.name); setPhone(p.phone ?? ''); setTaxId(p.taxId ?? ''); })
+    Promise.all([
+      getProfile(),
+      getVisibleCountries(),
+    ])
+      .then(([p, c]) => { setProfile(p); setName(p.name); setPhone(p.phone ?? ''); setTaxId(p.taxId ?? ''); setCountries(c); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -212,7 +217,12 @@ const AccountPage: React.FC = () => {
             <Col sm={6}>
               <Form.Group className="mb-2">
                 <Form.Label>{t('account.country')}</Form.Label>
-                <Form.Control value={addrForm.country ?? 'ES'} onChange={e => setAddrForm(f => ({ ...f, country: e.target.value }))} />
+                <Form.Select value={addrForm.country ?? 'ES'} onChange={e => setAddrForm(f => ({ ...f, country: e.target.value }))}>
+                  <option value="">{t('account.selectCountry')}</option>
+                  {countries.map(c => (
+                    <option key={c.isoCode} value={c.isoCode}>{c.name}</option>
+                  ))}
+                </Form.Select>
               </Form.Group>
             </Col>
           </Row>

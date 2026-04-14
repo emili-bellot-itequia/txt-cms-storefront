@@ -70,7 +70,19 @@ const CheckoutPage: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await checkout({ shippingAddressId: shippingId, billingAddressId: billingId, notes: notes || undefined });
+      const res = await checkout({
+        shippingAddressId: shippingId,
+        billingAddressId: billingId,
+        notes: notes || undefined,
+        browserAcceptHeader: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        browserUserAgent: navigator.userAgent,
+        browserJavaEnabled: false,
+        browserLanguage: navigator.language,
+        browserColorDepth: screen.colorDepth.toString(),
+        browserScreenHeight: screen.height.toString(),
+        browserScreenWidth: screen.width.toString(),
+        browserTZ: new Date().getTimezoneOffset().toString(),
+      });
       setRedsysData(res);
     } catch (e: unknown) {
       const err = e as { response?: { data?: { message?: string } } };
